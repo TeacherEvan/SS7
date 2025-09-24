@@ -77,7 +77,9 @@ class NumbersLevel:
         
         # Numbers configuration
         self.sequence = SEQUENCES["numbers"]
+        print(f"🔢 DEBUG: Numbers sequence: {self.sequence}")
         self.groups = [self.sequence[i:i+GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)]
+        print(f"🔢 DEBUG: Number groups: {self.groups}")
         self.TOTAL_NUMBERS = len(self.sequence)
         
         # Game state variables
@@ -88,8 +90,11 @@ class NumbersLevel:
         # Group progression variables
         self.current_group_index = 0
         self.current_group = self.groups[self.current_group_index] if self.groups else []
+        print(f"🎯 DEBUG: Current group {self.current_group_index}: {self.current_group}")
         self.numbers_to_target = self.current_group.copy()
+        print(f"🎯 DEBUG: Numbers to target: {self.numbers_to_target}")
         self.target_number = self.numbers_to_target[0] if self.numbers_to_target else None
+        print(f"🎯 DEBUG: Initial target number: {self.target_number}")
         
         # Counters and tracking
         self.total_destroyed = 0
@@ -104,6 +109,7 @@ class NumbersLevel:
         self.game_started = False
         self.numbers = []
         self.numbers_to_spawn = self.current_group.copy()
+        print(f"🎯 DEBUG: Numbers to spawn initialized: {self.numbers_to_spawn}")
         self.frame_count = 0
         
         # Checkpoint state
@@ -186,9 +192,8 @@ class NumbersLevel:
                 return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    # Exit the game completely instead of just returning to level menu
-                    pygame.quit()
-                    exit()
+                    # Return to level menu instead of exiting the game completely
+                    return "menu"
                 if event.key == pygame.K_SPACE:
                     self.current_ability = self.abilities[(self.abilities.index(self.current_ability) + 1) % len(self.abilities)]
                     
@@ -280,10 +285,13 @@ class NumbersLevel:
         if self.numbers_to_spawn:
             if self.frame_count % LETTER_SPAWN_INTERVAL == 0:
                 number_value = self.numbers_to_spawn.pop(0)
+                print(f"🎯 DEBUG: Spawning number '{number_value}' (frame {self.frame_count})")
+                print(f"🎯 DEBUG: numbers_to_spawn remaining: {self.numbers_to_spawn}")
                 number_obj = {
                     "value": number_value,
                     "x": random.randint(50, self.width - 50),
-                    "y": -50,                    "rect": pygame.Rect(0, 0, 0, 0),  # Will be updated when drawn
+                    "y": -50,
+                    "rect": pygame.Rect(0, 0, 0, 0),  # Will be updated when drawn
                     "size": 240,  # Fixed size
                     "dx": random.choice([-1, -0.5, 0.5, 1]) * 1.5,  # Horizontal drift
                     "dy": random.choice([6, 11.5]) * 1.5 * 3.2,  # 20% faster fall speed

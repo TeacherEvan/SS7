@@ -87,12 +87,21 @@ When adding new levels, follow the existing constructor pattern and ensure all u
 - **Complex data persistence** - Only `level_progress.txt` for basic state
 - **Analytics or telemetry** - No data collection features
 - **Social features** - No sharing, leaderboards, or online connectivity
+- **Settings menus or configuration GUIs** - No complex settings interfaces
+- **Display mode selectors** - Game auto-detects appropriate display mode
 
 **✅ MAINTAIN PLUG-AND-PLAY DESIGN:**
 - **Zero setup required** - Run `python SS6.origional.py` and play immediately
 - **Self-contained** - All dependencies included or auto-installed via `install.py`
 - **No external services** - No internet connectivity required
 - **Simple file structure** - Keep the current clean organization
-- **Minimal configuration** - Settings should be simple and optional
+- **Minimal configuration** - Automatic configuration only, no user settings
+- **Simplified UI** - Clean, distraction-free interface focused on gameplay
 
-**DESIGN PHILOSOPHY:** This is an educational tool that should "just work" when deployed to classrooms, libraries, or homes without any setup complexity, user accounts, or data tracking concerns.
+**DESIGN PHILOSOPHY:** This is an educational tool that should "just work" when deployed to classrooms, libraries, or homes without any setup complexity, user accounts, settings menus, or data tracking concerns. The interface should be as simple as possible - just the game and learning content.
+
+**CURRENT UI FLOW:**
+1. **Welcome Screen** - Simple particle animation with "click to continue"
+2. **Level Menu** - Direct selection of game modes (Alphabet, Numbers, Shapes, etc.)
+3. **Game Levels** - Pure gameplay with minimal UI distractions
+4. **Navigation** - ESC key returns to previous screen (levels → menu → exit)

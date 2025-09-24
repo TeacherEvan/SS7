@@ -189,8 +189,8 @@ class ShapesLevel:
                 return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    exit()
+                    # Return to level menu instead of exiting the game completely
+                    return "menu"
                 if event.key == pygame.K_SPACE:
                     self.current_ability = self.abilities[(self.abilities.index(self.current_ability) + 1) % len(self.abilities)]
             

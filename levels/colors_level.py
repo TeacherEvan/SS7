@@ -192,7 +192,7 @@ class ColorsLevel:
                 if event.type == pygame.QUIT:
                     return False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    return False
+                    return "menu"
                     
             self.screen.fill(BLACK)
             vib_x = center[0] + random.randint(-6, 6)
@@ -220,7 +220,7 @@ class ColorsLevel:
                 if event.type == pygame.QUIT:
                     return False
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    return False
+                    return "menu"
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     waiting_for_dispersion = False
                     
@@ -371,7 +371,7 @@ class ColorsLevel:
                 return False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.running = False
-                return False
+                return "menu"
                 
             # Handle mouse clicks
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:

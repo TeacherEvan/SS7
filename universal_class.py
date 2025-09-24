@@ -1279,6 +1279,8 @@ class SoundManager:
         self.sfx_volume = 0.8
         self.voice_volume = 0.9
         self.muted = False
+        self.voice_generator = None  # Will be initialized lazily
+        self.event_tracker = None  # Will be set by external code
         
         # Initialize pygame mixer
         self._initialize_mixer()
@@ -1289,10 +1291,21 @@ class SoundManager:
     def _initialize_mixer(self):
         """Initialize pygame mixer with appropriate settings."""
         try:
-            pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=512)
+            # Check if mixer is already initialized
+            if pygame.mixer.get_init():
+                print("✅ Sound system already initialized, using existing mixer")
+                self.initialized = True
+                if self.event_tracker:
+                    self.event_tracker.track_initialization("sound_mixer", True, "Using existing mixer")
+                return
+                
+            # Initialize with better settings to avoid static
+            pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
             pygame.mixer.init()
             self.initialized = True
             print("✅ Sound system initialized successfully")
+            if self.event_tracker:
+                self.event_tracker.track_initialization("sound_mixer", True, "New mixer initialized")
         except pygame.error as e:
             print(f"❌ Failed to initialize sound system: {e}")
             self.initialized = False
@@ -1321,14 +1334,34 @@ class SoundManager:
             else:
                 print(f"⚠️ Sound file not found: {file_path}")
         
-        # Load basic voice sounds (letter beeps for now)
-        voice_files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
-        for letter in voice_files:
+        # Load all voice sounds for letters, numbers, colors, and shapes
+        # Letters A-Z
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        for letter in alphabet:
             file_path = os.path.join(sounds_dir, f"{letter}.wav")
             if os.path.exists(file_path):
-                self.load_voice_sound(letter.upper(), file_path)
-            else:
-                print(f"⚠️ Voice file not found: {file_path}")
+                self.load_voice_sound(letter, file_path)
+        
+        # Numbers 1-10
+        numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        for number in numbers:
+            file_path = os.path.join(sounds_dir, f"{number}.wav")
+            if os.path.exists(file_path):
+                self.load_voice_sound(number, file_path)
+        
+        # Colors
+        colors = ["red", "blue", "green", "yellow", "purple"]
+        for color in colors:
+            file_path = os.path.join(sounds_dir, f"{color}.wav")
+            if os.path.exists(file_path):
+                self.load_voice_sound(color, file_path)
+        
+        # Shapes
+        shapes = ["circle", "square", "triangle", "rectangle", "pentagon"]
+        for shape in shapes:
+            file_path = os.path.join(sounds_dir, f"{shape}.wav")
+            if os.path.exists(file_path):
+                self.load_voice_sound(shape, file_path)
             
     def reset(self):
         """Reset sound manager state for new level/game."""
@@ -1348,16 +1381,27 @@ class SoundManager:
             bool: True if loaded successfully, False otherwise
         """
         if not self.initialized:
+            print(f"⚠️ Sound system not initialized, cannot load {sound_name}")
             return False
             
         try:
+            import os
+            if not os.path.exists(file_path):
+                print(f"❌ Sound file not found: {file_path}")
+                return False
+                
             sound = pygame.mixer.Sound(file_path)
-            sound.set_volume(self.sfx_volume * self.master_volume)
+            # Ensure volume doesn't clip by limiting it
+            volume = min(0.8, self.sfx_volume * self.master_volume)
+            sound.set_volume(volume)
             self.sounds[sound_name] = sound
-            print(f"✅ Loaded sound: {sound_name}")
+            print(f"✅ Loaded sound: {sound_name} (volume: {volume:.2f})")
             return True
         except pygame.error as e:
             print(f"❌ Failed to load sound {sound_name}: {e}")
+            return False
+        except Exception as e:
+            print(f"❌ Unexpected error loading sound {sound_name}: {e}")
             return False
             
     def load_voice_sound(self, voice_name, file_path):
@@ -1372,16 +1416,27 @@ class SoundManager:
             bool: True if loaded successfully, False otherwise
         """
         if not self.initialized:
+            print(f"⚠️ Sound system not initialized, cannot load voice {voice_name}")
             return False
             
         try:
+            import os
+            if not os.path.exists(file_path):
+                print(f"❌ Voice file not found: {file_path}")
+                return False
+                
             sound = pygame.mixer.Sound(file_path)
-            sound.set_volume(self.voice_volume * self.master_volume)
+            # Ensure volume doesn't clip by limiting it
+            volume = min(0.9, self.voice_volume * self.master_volume)
+            sound.set_volume(volume)
             self.voice_sounds[voice_name] = sound
-            print(f"✅ Loaded voice: {voice_name}")
+            print(f"✅ Loaded voice: {voice_name} (volume: {volume:.2f})")
             return True
         except pygame.error as e:
             print(f"❌ Failed to load voice {voice_name}: {e}")
+            return False
+        except Exception as e:
+            print(f"❌ Unexpected error loading voice {voice_name}: {e}")
             return False
             
     def play_sound(self, sound_name):
@@ -1394,11 +1449,23 @@ class SoundManager:
         Returns:
             bool: True if played successfully, False otherwise
         """
-        if not self.initialized or self.muted or sound_name not in self.sounds:
+        if not self.initialized or self.muted:
+            return False
+            
+        if sound_name not in self.sounds:
+            print(f"⚠️ Sound '{sound_name}' not found in loaded sounds")
             return False
             
         try:
+            # Stop the sound first to prevent overlapping static
+            self.sounds[sound_name].stop()
+            # Play the sound
             self.sounds[sound_name].play()
+            
+            # Track successful sound play
+            if self.event_tracker:
+                self.event_tracker.track_sound_played(sound_name, True)
+            
             return True
         except pygame.error as e:
             print(f"❌ Failed to play sound {sound_name}: {e}")
@@ -1414,11 +1481,26 @@ class SoundManager:
         Returns:
             bool: True if played successfully, False otherwise
         """
-        if not self.initialized or self.muted or voice_name not in self.voice_sounds:
+        if not self.initialized or self.muted:
             return False
             
+        # Ensure voice is available, generate if needed
+        if voice_name not in self.voice_sounds:
+            print(f"🔄 Voice '{voice_name}' not loaded, attempting to generate...")
+            if not self.ensure_voice_available(voice_name):
+                print(f"❌ Failed to ensure voice '{voice_name}' is available")
+                return False
+            
         try:
+            # Stop any currently playing voice to prevent overlap
+            pygame.mixer.stop()  # Stop all sounds to ensure voice clarity
             self.voice_sounds[voice_name].play()
+            print(f"🔊 Playing voice: {voice_name}")
+            
+            # Track successful voice play
+            if self.event_tracker:
+                self.event_tracker.track_voice_played(voice_name, True)
+            
             return True
         except pygame.error as e:
             print(f"❌ Failed to play voice {voice_name}: {e}")
@@ -1476,7 +1558,77 @@ class SoundManager:
         """Update volumes for all voice sounds."""
         for sound in self.voice_sounds.values():
             sound.set_volume(self.voice_volume * self.master_volume)
+    
+    def _get_voice_generator(self):
+        """Lazy initialization of voice generator."""
+        if self.voice_generator is None:
+            try:
+                from utils.voice_generator import VoiceGenerator
+                self.voice_generator = VoiceGenerator()
+            except ImportError:
+                print("⚠️ VoiceGenerator not available, voice generation disabled")
+                self.voice_generator = False  # Mark as unavailable
+        return self.voice_generator if self.voice_generator else None
+    
+    def generate_and_load_voice(self, text):
+        """
+        Generate a voice file using AI and load it.
+        
+        Args:
+            text (str): Text to generate voice for
             
+        Returns:
+            bool: True if generated and loaded successfully
+        """
+        voice_gen = self._get_voice_generator()
+        if not voice_gen:
+            return False
+            
+        try:
+            import os
+            sounds_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
+            file_path = os.path.join(sounds_dir, f"{text}.wav")
+            
+            # Generate the voice file
+            if voice_gen.generate_voice_file(text, file_path):
+                # Load the generated file
+                return self.load_voice_sound(text, file_path)
+            else:
+                print(f"⚠️ Failed to generate voice for: {text}")
+                return False
+        except Exception as e:
+            print(f"❌ Error generating voice for {text}: {e}")
+            return False
+    
+    def ensure_voice_available(self, text):
+        """
+        Ensure a voice is available, generating it if necessary.
+        
+        Args:
+            text (str): Text to ensure voice for
+            
+        Returns:
+            bool: True if voice is available
+        """
+        # Check if already loaded
+        if text in self.voice_sounds:
+            return True
+            
+        # Try to load from existing file
+        import os
+        sounds_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sounds")
+        file_path = os.path.join(sounds_dir, f"{text}.wav")
+        
+        if os.path.exists(file_path):
+            return self.load_voice_sound(text, file_path)
+        else:
+            # Generate and load the voice
+            return self.generate_and_load_voice(text)
+            
+    def set_event_tracker(self, event_tracker):
+        """Set the event tracker for this sound manager."""
+        self.event_tracker = event_tracker
+    
     def get_status(self):
         """
         Get current status of the sound manager.

@@ -16,6 +16,10 @@ from Display_settings import (
 from universal_class import GlassShatterManager, HUDManager, CheckpointManager, FlamethrowerManager, CenterPieceManager, SoundManager
 from welcome_screen import welcome_screen, level_menu, draw_neon_button
 from levels import ColorsLevel, ShapesLevel, AlphabetLevel, NumbersLevel, CLCaseLevel
+from utils.event_tracker import get_event_manager
+
+# Initialize sound mixer before pygame.init() to avoid conflicts
+pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
 
 pygame.init()
 
@@ -47,13 +51,19 @@ from utils.resource_manager import ResourceManager
 from utils.particle_system import ParticleManager
 from universal_class import MultiTouchManager
 
-# Initialize particle manager globally
+# Initialize global event tracking system early
+event_manager = get_event_manager()
+
+# Initialize managers globally
 particle_manager = None
+glass_shatter_manager = None
 multi_touch_manager = None
 hud_manager = None
 checkpoint_manager = None
 flamethrower_manager = None
 center_piece_manager = None
+sound_manager = None
+event_manager = None
 
 def init_resources():
     """
@@ -61,7 +71,7 @@ def init_resources():
     """
     global font_sizes, fonts, large_font, small_font, TARGET_FONT, TITLE_FONT
     global MAX_PARTICLES, MAX_EXPLOSIONS, MAX_SWIRL_PARTICLES, mother_radius
-    global particle_manager, glass_shatter_manager, multi_touch_manager, hud_manager, checkpoint_manager, flamethrower_manager, center_piece_manager
+    global particle_manager, glass_shatter_manager, multi_touch_manager, hud_manager, checkpoint_manager, flamethrower_manager, center_piece_manager, sound_manager
     
     # Get resource manager singleton
     resource_manager = ResourceManager()
@@ -110,6 +120,8 @@ def init_resources():
     # Initialize sound manager
     global sound_manager
     sound_manager = SoundManager()
+    # Connect event tracker to sound manager (will be set after init_resources)
+    # sound_manager.set_event_tracker(event_manager.get_tracker("sound"))
     
     # Initialize center piece manager
     center_piece_manager = CenterPieceManager(WIDTH, HEIGHT, DISPLAY_MODE, particle_manager, MAX_SWIRL_PARTICLES, resource_manager)
@@ -123,6 +135,18 @@ def init_resources():
 
 # Initialize resources with current mode
 resource_manager = init_resources()
+
+# Connect event tracker to sound manager now that both are initialized (if event manager is available)
+if event_manager:
+    sound_manager.set_event_tracker(event_manager.get_tracker("sound"))
+    
+    # Track successful initialization
+    event_manager.track_event("system", "initialization", {
+        "component": "SS6_Game",
+        "success": True,
+        "display_mode": DISPLAY_MODE,
+        "screen_size": f"{WIDTH}x{HEIGHT}"
+    })
 
 # OPTIMIZATION: Global particle system limits to prevent lag
 PARTICLE_CULLING_DISTANCE = WIDTH  # Distance at which to cull offscreen particles
@@ -142,11 +166,7 @@ particles = []
 explosions = []
 lasers = []
 
-# Glass shatter manager - will be initialized after screen setup
-glass_shatter_manager = None
-
-# Sound manager - will be initialized in init_resources
-sound_manager = None
+# Glass shatter manager and sound manager are initialized in init_resources()
 
 # Add this near the other global variables at the top
 player_color_transition = 0
@@ -179,6 +199,11 @@ convergence_timer = 0
 
 def game_loop(mode):
     global shake_duration, shake_magnitude, particles, explosions, lasers, charging_ability, charge_timer, charge_particles, ability_target, convergence_target, convergence_timer, mother_radius, color_idx, color_sequence, next_color_index, target_dots_left, glass_shatter_manager, multi_touch_manager, flamethrower_manager, center_piece_manager
+    
+    # Event tracking for the level start (if event manager is available)
+    if event_manager:
+        event_manager.get_tracker("level").track_level_start(mode)
+        event_manager.get_tracker("gameplay").reset_session_stats()
     
     # Reset global effects that could persist between levels
     shake_duration = 0
@@ -509,6 +534,12 @@ def create_explosion(x, y, color=None, max_radius=270, duration=30):
     # Play explosion sound effect
     if sound_manager:
         sound_manager.play_sound("explosion")
+        
+    # Track explosion event (if event manager is available)
+    if event_manager:
+        event_manager.track_event("gameplay", "explosion_created", {
+            "x": x, "y": y, "max_radius": max_radius, "duration": duration
+        })
     
     # Limit number of explosions for performance
     if len(explosions) >= MAX_EXPLOSIONS:
@@ -580,8 +611,17 @@ if __name__ == "__main__":
             break
         
         # Run the game loop and check its return value
-        restart_level = game_loop(mode)
+        result = game_loop(mode)
+        
+        # If result is "menu", user pressed ESC - return to level menu
+        if result == "menu":
+            continue
         
         # If game_loop returns True, restart the level for shapes level or colors level
+        restart_level = result
         while restart_level and (mode == "shapes" or mode == "colors"):
-            restart_level = game_loop(mode)
+            result = game_loop(mode)
+            # Check for ESC in restart loop too
+            if result == "menu":
+                break
+            restart_level = result

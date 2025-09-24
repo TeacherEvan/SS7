@@ -76,6 +76,13 @@ class AlphabetLevel:
         self.game_over_screen = game_over_screen_func
         self.sound_manager = sound_manager
         
+        # Get event manager for tracking
+        try:
+            from utils.event_tracker import get_event_manager
+            self.event_manager = get_event_manager()
+        except ImportError:
+            self.event_manager = None
+        
         # Alphabet configuration
         self.sequence = SEQUENCES["alphabet"]
         self.groups = [self.sequence[i:i+GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)]
@@ -172,7 +179,11 @@ class AlphabetLevel:
             # Update frame counter and display
             self.frame_count += 1
             pygame.display.flip()
-            clock.tick(50)
+            fps = clock.tick(50)
+            
+            # Track performance metrics
+            if self.event_manager and self.frame_count % 30 == 0:  # Track every 30 frames
+                self.event_manager.get_tracker("performance").track_frame(fps)
             
         return False
         
@@ -187,9 +198,9 @@ class AlphabetLevel:
                 return False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    # Exit the game completely instead of just returning to level menu
-                    pygame.quit()
-                    exit()
+                    # Return to level menu instead of exiting the game completely
+                    self.running = False
+                    return "menu"
                 if event.key == pygame.K_SPACE:
                     self.current_ability = self.abilities[(self.abilities.index(self.current_ability) + 1) % len(self.abilities)]
                     
@@ -242,6 +253,12 @@ class AlphabetLevel:
                                     # Remove letter and update counts
                                     self.letters.remove(letter_obj)
                                     self.letters_destroyed += 1
+                                    
+                                    # Track target hit event
+                                    if self.event_manager:
+                                        self.event_manager.get_tracker("gameplay").track_target_hit(
+                                            "letter", letter_obj["value"], 10
+                                        )
 
                                     # Update target
                                     if self.target_letter in self.letters_to_target:
@@ -254,6 +271,10 @@ class AlphabetLevel:
                         # If no target was hit, add a crack to the screen
                         if not hit_target and self.game_started:
                             self.glass_shatter_manager.handle_misclick(click_x, click_y)
+                            
+                            # Track missed target event
+                            if self.event_manager:
+                                self.event_manager.get_tracker("gameplay").track_target_missed(click_x, click_y)
 
             elif event.type == pygame.FINGERDOWN:
                 touch_result = self.multi_touch_manager.handle_touch_down(event)
