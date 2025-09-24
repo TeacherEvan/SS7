@@ -1,0 +1,1352 @@
+SS6 Configuration Migration Report
+==================================================
+
+Found 606 Python files to analyze
+
+File: settings.py
+-----------------
+  Line 13: COLORS_COLLISION_DELAY
+    Current: COLORS_COLLISION_DELAY = _config.get('game.game.collision_delay', 250)
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 14: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH = _config.get('game.game.level_progress_path', 'level_progress.txt')
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 15: WHITE
+    Current: WHITE = tuple(_config.get('game.colors.white', [255, 255, 255]))
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 16: BLACK
+    Current: BLACK = tuple(_config.get('game.colors.black', [0, 0, 0]))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 17: FLAME_COLORS
+    Current: FLAME_COLORS = [tuple(color) for color in _config.get('game.colors.flame_colors', [[255, 69, 0], [255, 215, 0], [0, 191, 255]])]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 18: LASER_EFFECTS
+    Current: LASER_EFFECTS = _config.get('game.effects.laser_effects', [])
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 19: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL = _config.get('game.game.letter_spawn_interval', 60)
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 20: SEQUENCES
+    Current: SEQUENCES = _config.get('game.sequences', {})
+    Replace with: config.get('game.sequences')
+
+  Line 21: GAME_MODES
+    Current: GAME_MODES = _config.get('game.game_modes', [])
+    Replace with: config.get('game.game_modes')
+
+  Line 22: GROUP_SIZE
+    Current: GROUP_SIZE = _config.get('game.game.group_size', 5)
+    Replace with: config.get('game.game.group_size')
+
+  Line 27: COLORS_COLLISION_DELAY
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 27: LEVEL_PROGRESS_PATH
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 27: WHITE
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 27: BLACK
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 28: FLAME_COLORS
+    Current: global FLAME_COLORS, LASER_EFFECTS, LETTER_SPAWN_INTERVAL
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 28: LASER_EFFECTS
+    Current: global FLAME_COLORS, LASER_EFFECTS, LETTER_SPAWN_INTERVAL
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 28: LETTER_SPAWN_INTERVAL
+    Current: global FLAME_COLORS, LASER_EFFECTS, LETTER_SPAWN_INTERVAL
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 29: SEQUENCES
+    Current: global SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.sequences')
+
+  Line 29: GAME_MODES
+    Current: global SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.game_modes')
+
+  Line 29: GROUP_SIZE
+    Current: global SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.game.group_size')
+
+  Line 33: COLORS_COLLISION_DELAY
+    Current: COLORS_COLLISION_DELAY = _config.get('game.game.collision_delay', 250)
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 34: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH = _config.get('game.game.level_progress_path', 'level_progress.txt')
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 35: WHITE
+    Current: WHITE = tuple(_config.get('game.colors.white', [255, 255, 255]))
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 36: BLACK
+    Current: BLACK = tuple(_config.get('game.colors.black', [0, 0, 0]))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 37: FLAME_COLORS
+    Current: FLAME_COLORS = [tuple(color) for color in _config.get('game.colors.flame_colors', [[255, 69, 0], [255, 215, 0], [0, 191, 255]])]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 38: LASER_EFFECTS
+    Current: LASER_EFFECTS = _config.get('game.effects.laser_effects', [])
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 39: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL = _config.get('game.game.letter_spawn_interval', 60)
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 40: SEQUENCES
+    Current: SEQUENCES = _config.get('game.sequences', {})
+    Replace with: config.get('game.sequences')
+
+  Line 41: GAME_MODES
+    Current: GAME_MODES = _config.get('game.game_modes', [])
+    Replace with: config.get('game.game_modes')
+
+  Line 42: GROUP_SIZE
+    Current: GROUP_SIZE = _config.get('game.game.group_size', 5)
+    Replace with: config.get('game.game.group_size')
+
+  Line 57: GAME_MODES
+    Current: return [mode for mode in GAME_MODES if _config.is_game_mode_enabled(mode)]
+    Replace with: config.get('game.game_modes')
+
+
+File: SS6.origional.py
+----------------------
+  Line 5: COLORS_COLLISION_DELAY
+    Current: COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK, FLAME_COLORS, LASER_EFFECTS,
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 5: LEVEL_PROGRESS_PATH
+    Current: COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK, FLAME_COLORS, LASER_EFFECTS,
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 5: WHITE
+    Current: COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK, FLAME_COLORS, LASER_EFFECTS,
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 5: BLACK
+    Current: COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK, FLAME_COLORS, LASER_EFFECTS,
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 5: FLAME_COLORS
+    Current: COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK, FLAME_COLORS, LASER_EFFECTS,
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 5: LASER_EFFECTS
+    Current: COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK, FLAME_COLORS, LASER_EFFECTS,
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 6: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL, SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 6: SEQUENCES
+    Current: LETTER_SPAWN_INTERVAL, SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.sequences')
+
+  Line 6: GAME_MODES
+    Current: LETTER_SPAWN_INTERVAL, SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.game_modes')
+
+  Line 6: GROUP_SIZE
+    Current: LETTER_SPAWN_INTERVAL, SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.game.group_size')
+
+  Line 153: FLAME_COLORS
+    Current: player_current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 154: FLAME_COLORS
+    Current: player_next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 210: LEVEL_PROGRESS_PATH
+    Current: with open(LEVEL_PROGRESS_PATH, "r") as f:
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 221: SEQUENCES
+    Current: sequence = SEQUENCES.get(mode, SEQUENCES["alphabet"])  # Default to alphabet if mode not found
+    Replace with: config.get('game.sequences')
+
+  Line 223: GROUP_SIZE
+    Current: # Split into groups of GROUP_SIZE
+    Replace with: config.get('game.game.group_size')
+
+  Line 224: GROUP_SIZE
+    Current: groups = [sequence[i:i+GROUP_SIZE] for i in range(0, len(sequence), GROUP_SIZE)]
+    Replace with: config.get('game.game.group_size')
+
+  Line 381: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 396: WHITE
+    Current: well_done_text = well_done_font.render("Well Done!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 401: WHITE
+    Current: score_text = small_font.render(f"Final Score: {score}", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 407: BLACK
+    Current: next_player_color = random.choice(FLAME_COLORS) if flash else BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 407: FLAME_COLORS
+    Current: next_player_color = random.choice(FLAME_COLORS) if flash else BLACK
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 445: FLAME_COLORS
+    Current: random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 479: FLAME_COLORS
+    Current: "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 520: FLAME_COLORS
+    Current: color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+
+File: universal_class.py
+------------------------
+  Line 27: WHITE
+    Current: WHITE, BLACK, FLAME_COLORS
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 27: BLACK
+    Current: WHITE, BLACK, FLAME_COLORS
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 27: FLAME_COLORS
+    Current: WHITE, BLACK, FLAME_COLORS
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 180: WHITE
+    Current: self.current_background = WHITE
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 181: BLACK
+    Current: self.opposite_background = BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 198: WHITE
+    Current: self.current_background = WHITE
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 199: BLACK
+    Current: self.opposite_background = BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 285: WHITE
+    Current: draw_crack_color = WHITE if self.current_background == BLACK else BLACK
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 285: BLACK
+    Current: draw_crack_color = WHITE if self.current_background == BLACK else BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 369: WHITE
+    Current: draw_crack_color = WHITE if self.current_background == BLACK else BLACK
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 369: BLACK
+    Current: draw_crack_color = WHITE if self.current_background == BLACK else BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 475: WHITE
+    Current: text_color = BLACK if self.glass_shatter_manager.get_background_color() == WHITE else WHITE
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 475: BLACK
+    Current: text_color = BLACK if self.glass_shatter_manager.get_background_color() == WHITE else WHITE
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 541: WHITE
+    Current: text_color = BLACK if self.glass_shatter_manager.get_background_color() == WHITE else WHITE
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 541: BLACK
+    Current: text_color = BLACK if self.glass_shatter_manager.get_background_color() == WHITE else WHITE
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 560: WHITE
+    Current: pygame.draw.rect(screen, WHITE, (sample_x - 30, sample_y - 30, 60, 60), 2)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 569: WHITE
+    Current: text_color = BLACK if self.glass_shatter_manager.get_background_color() == WHITE else WHITE
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 569: BLACK
+    Current: text_color = BLACK if self.glass_shatter_manager.get_background_color() == WHITE else WHITE
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 634: FLAME_COLORS
+    Current: current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 635: FLAME_COLORS
+    Current: next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 641: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 669: FLAME_COLORS
+    Current: next_color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 684: WHITE
+    Current: subtext = self.small_font.render("Well done! You've completed this task!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 694: WHITE
+    Current: cont_text = self.small_font.render("Replay Level", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 696: WHITE
+    Current: cont_text = self.small_font.render("Continue", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 697: WHITE
+    Current: menu_text = self.small_font.render("Level Select", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 759: FLAME_COLORS
+    Current: color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 825: FLAME_COLORS
+    Current: colors = FLAME_COLORS
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 899: FLAME_COLORS
+    Current: color = random.choice(flamethrower.get("colors", FLAME_COLORS))
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 969: FLAME_COLORS
+    Current: self.player_current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 970: FLAME_COLORS
+    Current: self.player_next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 986: FLAME_COLORS
+    Current: self.player_current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 987: FLAME_COLORS
+    Current: self.player_next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1049: FLAME_COLORS
+    Current: "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1187: FLAME_COLORS
+    Current: current_index = FLAME_COLORS.index(self.player_current_color)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1188: FLAME_COLORS
+    Current: next_index = (current_index + 1) % len(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1189: FLAME_COLORS
+    Current: self.player_current_color = FLAME_COLORS[current_index]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1190: FLAME_COLORS
+    Current: self.player_next_color = FLAME_COLORS[next_index]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1235: BLACK
+    Current: # Use BLACK color for center target (as in original shapes implementation)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1236: BLACK
+    Current: center_target_color = BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+
+File: welcome_screen.py
+-----------------------
+  Line 4: WHITE
+    Current: from settings import WHITE, BLACK, FLAME_COLORS
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 4: BLACK
+    Current: from settings import WHITE, BLACK, FLAME_COLORS
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 4: FLAME_COLORS
+    Current: from settings import WHITE, BLACK, FLAME_COLORS
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 33: FLAME_COLORS
+    Current: current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 34: FLAME_COLORS
+    Current: next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 63: WHITE
+    Current: title_surface = small_font.render("Choose Mission:", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 64: WHITE
+    Current: abc_surface = small_font.render("A B C", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 65: WHITE
+    Current: num_surface = small_font.render("1 2 3", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 66: WHITE
+    Current: shapes_surface = small_font.render("Shapes", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 67: WHITE
+    Current: clcase_surface = small_font.render("C/L Case", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 68: WHITE
+    Current: colors_surface = small_font.render("Colors", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 74: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 122: FLAME_COLORS
+    Current: next_color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 173: FLAME_COLORS
+    Current: display_selector = DisplayModeSelector(WIDTH, HEIGHT, screen, small_font, FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 222: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+
+File: .venv\Lib\site-packages\pygame\tests\draw_test.py
+-------------------------------------------------------
+  Line 628: BLACK
+    Current: surface.fill("BLACK")
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 638: BLACK
+    Current: and surface.get_at((x, y)) == pygame.Color("BLACK")
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1815: WHITE
+    Current: WHITE = (255, 255, 255, 255)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1817: WHITE
+    Current: [1 for dx, dy in offsets if surf.get_at((x + dx, y + dy)) == WHITE]
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1824: BLACK
+    Current: BLACK = (0, 0, 0, 255)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1827: BLACK
+    Current: if surf.get_at((x, y)) == BLACK:
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+
+File: .venv\Lib\site-packages\pygame\tests\sprite_test.py
+---------------------------------------------------------
+  Line 1129: WHITE
+    Current: WHITE = pygame.Color("white")
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1133: WHITE
+    Current: surface.fill(WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+
+File: levels\alphabet_level.py
+------------------------------
+  Line 5: WHITE
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 5: BLACK
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 5: FLAME_COLORS
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 5: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 6: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 6: SEQUENCES
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.sequences')
+
+  Line 6: GROUP_SIZE
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.game.group_size')
+
+  Line 80: SEQUENCES
+    Current: self.sequence = SEQUENCES["alphabet"]
+    Replace with: config.get('game.sequences')
+
+  Line 81: GROUP_SIZE
+    Current: self.groups = [self.sequence[i:i+GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)]
+    Replace with: config.get('game.game.group_size')
+
+  Line 236: FLAME_COLORS
+    Current: random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 288: FLAME_COLORS
+    Current: random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 320: LETTER_SPAWN_INTERVAL
+    Current: if self.frame_count % LETTER_SPAWN_INTERVAL == 0:
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 530: BLACK
+    Current: text_color = BLACK if letter_obj["value"] == self.target_letter else (150, 150, 150)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 558: FLAME_COLORS
+    Current: pygame.draw.line(self.screen, random.choice(laser.get("colors", FLAME_COLORS)),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+
+File: levels\cl_case_level.py
+-----------------------------
+  Line 5: WHITE
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 5: BLACK
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 5: FLAME_COLORS
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 5: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 6: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 6: SEQUENCES
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.sequences')
+
+  Line 6: GROUP_SIZE
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.game.group_size')
+
+  Line 80: SEQUENCES
+    Current: self.sequence = SEQUENCES["clcase"]
+    Replace with: config.get('game.sequences')
+
+  Line 81: GROUP_SIZE
+    Current: self.groups = [self.sequence[i:i+GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)]
+    Replace with: config.get('game.game.group_size')
+
+  Line 278: FLAME_COLORS
+    Current: random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 304: LETTER_SPAWN_INTERVAL
+    Current: if self.frame_count % LETTER_SPAWN_INTERVAL == 0:
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 546: BLACK
+    Current: text_color = BLACK if letter_obj["value"] == self.target_letter else (150, 150, 150)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 570: FLAME_COLORS
+    Current: pygame.draw.line(self.screen, random.choice(laser.get("colors", FLAME_COLORS)),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+
+File: levels\colors_level.py
+----------------------------
+  Line 5: COLORS_COLLISION_DELAY
+    Current: COLORS_COLLISION_DELAY, WHITE, BLACK, FLAME_COLORS,
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 5: WHITE
+    Current: COLORS_COLLISION_DELAY, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 5: BLACK
+    Current: COLORS_COLLISION_DELAY, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 5: FLAME_COLORS
+    Current: COLORS_COLLISION_DELAY, WHITE, BLACK, FLAME_COLORS,
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 6: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 99: COLORS_COLLISION_DELAY
+    Current: self.collision_delay_frames = COLORS_COLLISION_DELAY
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 197: BLACK
+    Current: self.screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 203: WHITE
+    Current: label = self.small_font.render("Remember this color!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 228: BLACK
+    Current: self.screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 231: WHITE
+    Current: label = self.small_font.render("Remember this color!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 309: BLACK
+    Current: self.screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 700: WHITE
+    Current: pygame.draw.circle(self.screen, WHITE, (draw_x, draw_y), radius + border_width, border_width)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+
+File: levels\numbers_level.py
+-----------------------------
+  Line 5: WHITE
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 5: BLACK
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 5: FLAME_COLORS
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 5: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 6: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 6: SEQUENCES
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.sequences')
+
+  Line 6: GROUP_SIZE
+    Current: LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    Replace with: config.get('game.game.group_size')
+
+  Line 79: SEQUENCES
+    Current: self.sequence = SEQUENCES["numbers"]
+    Replace with: config.get('game.sequences')
+
+  Line 80: GROUP_SIZE
+    Current: self.groups = [self.sequence[i:i+GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)]
+    Replace with: config.get('game.game.group_size')
+
+  Line 253: FLAME_COLORS
+    Current: random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 281: LETTER_SPAWN_INTERVAL
+    Current: if self.frame_count % LETTER_SPAWN_INTERVAL == 0:
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 514: BLACK
+    Current: text_color = BLACK if number_obj["value"] == self.target_number else (150, 150, 150)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 538: FLAME_COLORS
+    Current: pygame.draw.line(self.screen, random.choice(laser.get("colors", FLAME_COLORS)),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+
+File: levels\shapes_level.py
+----------------------------
+  Line 5: FLAME_COLORS
+    Current: SEQUENCES, GROUP_SIZE, LETTER_SPAWN_INTERVAL, FLAME_COLORS,
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 5: LETTER_SPAWN_INTERVAL
+    Current: SEQUENCES, GROUP_SIZE, LETTER_SPAWN_INTERVAL, FLAME_COLORS,
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 5: SEQUENCES
+    Current: SEQUENCES, GROUP_SIZE, LETTER_SPAWN_INTERVAL, FLAME_COLORS,
+    Replace with: config.get('game.sequences')
+
+  Line 5: GROUP_SIZE
+    Current: SEQUENCES, GROUP_SIZE, LETTER_SPAWN_INTERVAL, FLAME_COLORS,
+    Replace with: config.get('game.game.group_size')
+
+  Line 6: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 6: WHITE
+    Current: LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 6: BLACK
+    Current: LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 75: SEQUENCES
+    Current: self.sequence = SEQUENCES["shapes"]
+    Replace with: config.get('game.sequences')
+
+  Line 76: GROUP_SIZE
+    Current: self.groups = [self.sequence[i:i+GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)]
+    Replace with: config.get('game.game.group_size')
+
+  Line 118: LEVEL_PROGRESS_PATH
+    Current: with open(LEVEL_PROGRESS_PATH, "r") as f:
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 252: FLAME_COLORS
+    Current: random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 280: LETTER_SPAWN_INTERVAL
+    Current: if self.frame_count % LETTER_SPAWN_INTERVAL == 0:
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 405: BLACK
+    Current: color = BLACK  # Use BLACK for falling shapes (as in original)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 489: FLAME_COLORS
+    Current: pygame.draw.line(self.screen, random.choice(laser.get("colors", FLAME_COLORS)),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 585: LEVEL_PROGRESS_PATH
+    Current: with open(LEVEL_PROGRESS_PATH, "w") as f:
+    Replace with: config.get('game.game.level_progress_path')
+
+
+File: SuperStudent-main\SuperStudent.py
+---------------------------------------
+  Line 25: WHITE
+    Current: WHITE = (255, 255, 255)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 26: BLACK
+    Current: BLACK = (0, 0, 0)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 27: FLAME_COLORS
+    Current: FLAME_COLORS = [
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 38: LASER_EFFECTS
+    Current: LASER_EFFECTS = [
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 39: FLAME_COLORS
+    Current: {"colors": FLAME_COLORS, "widths": [120, 140, 160, 180], "type": "flamethrower"},
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 53: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL = 30  # spawn interval in frames
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 67: FLAME_COLORS
+    Current: player_current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 68: FLAME_COLORS
+    Current: player_next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 111: BLACK
+    Current: static_surface.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 117: FLAME_COLORS
+    Current: current_color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 118: FLAME_COLORS
+    Current: next_color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 163: WHITE
+    Current: collab_text1 = collab_font.render("In collaboration with ", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 165: WHITE
+    Current: collab_text3 = collab_font.render(" Kindergarten", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 176: WHITE
+    Current: creator_text = small_font.render("Created by Teacher Evan and Teacher Lee", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 220: FLAME_COLORS
+    Current: current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 221: FLAME_COLORS
+    Current: next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 253: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 301: FLAME_COLORS
+    Current: next_color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 314: WHITE
+    Current: abc_text = small_font.render("A B C", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 320: WHITE
+    Current: num_text = small_font.render("1 2 3", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 326: WHITE
+    Current: shapes_text = small_font.render("Shapes", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 332: WHITE
+    Current: clcase_text = small_font.render("C/L Case", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 338: WHITE
+    Current: colors_text = small_font.render("Colors", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 475: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 480: WHITE
+    Current: label = small_font.render("Remember this color!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 484: BLACK
+    Current: screen.blit(small_font.render("", True, BLACK), (0,0))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 501: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 503: WHITE
+    Current: label = small_font.render("Remember this color!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 510: BLACK
+    Current: screen.blit(small_font.render("", True, BLACK), (0,0))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 555: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 562: BLACK
+    Current: screen.blit(small_font.render("", True, BLACK), (0,0))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 609: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 622: WHITE
+    Current: info = small_font.render(f"Target Color: {mother_color_name}   Remaining: {target_dots_left}   Score: {score}", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 626: WHITE
+    Current: pygame.draw.rect(screen, WHITE, (WIDTH - 90, 30, 60, 60), 2)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 628: BLACK
+    Current: screen.blit(small_font.render("", True, BLACK), (0,0))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 689: FLAME_COLORS
+    Current: "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 742: FLAME_COLORS
+    Current: "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 786: LETTER_SPAWN_INTERVAL
+    Current: if frame_count % LETTER_SPAWN_INTERVAL == 0:
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 813: WHITE
+    Current: screen.fill(WHITE) # Draw solid background first
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 837: FLAME_COLORS
+    Current: current_index = FLAME_COLORS.index(player_current_color)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 838: FLAME_COLORS
+    Current: next_index = (current_index + 1) % len(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 839: FLAME_COLORS
+    Current: player_current_color = FLAME_COLORS[current_index]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 840: FLAME_COLORS
+    Current: player_next_color = FLAME_COLORS[next_index]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 853: BLACK
+    Current: outline_color = BLACK # Use black outline for shapes
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 935: BLACK
+    Current: color = BLACK # always draw falling shapes as solid BLACK border
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 976: BLACK
+    Current: text_color = BLACK if letter_obj["value"] == target_letter else (150, 150, 150)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1150: FLAME_COLORS
+    Current: color = FLAME_COLORS[int((pygame.time.get_ticks() * 0.01 + i*2) % len(FLAME_COLORS))]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1173: FLAME_COLORS
+    Current: "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1302: LASER_EFFECTS
+    Current: effect = LASER_EFFECTS[0] # Force flamethrower
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 1303: LASER_EFFECTS
+    Current: # effect = random.choice(LASER_EFFECTS) # Or choose randomly
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 1347: FLAME_COLORS
+    Current: color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1401: BLACK
+    Current: score_text = small_font.render(f"Score: {score}", True, BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1403: BLACK
+    Current: ability_text = small_font.render(f"Ability: {ability.capitalize()}", True, BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1417: BLACK
+    Current: target_text = small_font.render(f"Target: {display_target}", True, BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1421: BLACK
+    Current: progress_text = small_font.render(f"Destroyed: {overall_destroyed}/{total_letters}", True, BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1433: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1448: WHITE
+    Current: well_done_text = well_done_font.render("Well Done!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1453: WHITE
+    Current: score_text = small_font.render(f"Final Score: {score}", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1459: BLACK
+    Current: next_player_color = random.choice(FLAME_COLORS) if flash else BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1459: FLAME_COLORS
+    Current: next_player_color = random.choice(FLAME_COLORS) if flash else BLACK
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1493: FLAME_COLORS
+    Current: current_color = FLAME_COLORS[0]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1494: FLAME_COLORS
+    Current: next_color = FLAME_COLORS[1]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1510: FLAME_COLORS
+    Current: color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1517: BLACK
+    Current: screen.fill(BLACK)
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 1546: FLAME_COLORS
+    Current: next_color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1559: WHITE
+    Current: subtext = small_font.render("10 targets destroyed!", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1567: WHITE
+    Current: cont_text = small_font.render("Continue", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1568: WHITE
+    Current: menu_text = small_font.render("Menu", True, WHITE)
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 1582: FLAME_COLORS
+    Current: "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1613: FLAME_COLORS
+    Current: "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1637: FLAME_COLORS
+    Current: color = random.choice(FLAME_COLORS)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1734: FLAME_COLORS
+    Current: create_explosion(target_x, target_y, color=random.choice(FLAME_COLORS), max_radius=100, duration=20)
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 1764: FLAME_COLORS
+    Current: #             "color": random.choice(FLAME_COLORS),
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+
+File: utils\config_manager.py
+-----------------------------
+  Line 334: COLORS_COLLISION_DELAY
+    Current: 'COLORS_COLLISION_DELAY': self.get('game.game.collision_delay', 250),
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 335: LEVEL_PROGRESS_PATH
+    Current: 'LEVEL_PROGRESS_PATH': self.get('game.game.level_progress_path', 'level_progress.txt'),
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 336: WHITE
+    Current: 'WHITE': tuple(self.get('game.colors.white', [255, 255, 255])),
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 337: BLACK
+    Current: 'BLACK': tuple(self.get('game.colors.black', [0, 0, 0])),
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 338: FLAME_COLORS
+    Current: 'FLAME_COLORS': [tuple(color) for color in self.get('game.colors.flame_colors', [[255, 69, 0], [255, 215, 0], [0, 191, 255]])],
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 339: LASER_EFFECTS
+    Current: 'LASER_EFFECTS': self.get('game.effects.laser_effects', []),
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 340: LETTER_SPAWN_INTERVAL
+    Current: 'LETTER_SPAWN_INTERVAL': self.get('game.game.letter_spawn_interval', 60),
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 341: SEQUENCES
+    Current: 'SEQUENCES': self.get('game.sequences', {}),
+    Replace with: config.get('game.sequences')
+
+  Line 342: GAME_MODES
+    Current: 'GAME_MODES': self.get('game.game_modes', []),
+    Replace with: config.get('game.game_modes')
+
+  Line 343: GROUP_SIZE
+    Current: 'GROUP_SIZE': self.get('game.game.group_size', 5)
+    Replace with: config.get('game.game.group_size')
+
+  Line 441: WHITE
+    Current: print("Legacy WHITE color:", legacy.get('WHITE'))
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+
+File: utils\config_migrator.py
+------------------------------
+  Line 29: COLORS_COLLISION_DELAY
+    Current: 'COLORS_COLLISION_DELAY': 'game.game.collision_delay',
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 30: LEVEL_PROGRESS_PATH
+    Current: 'LEVEL_PROGRESS_PATH': 'game.game.level_progress_path',
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 31: WHITE
+    Current: 'WHITE': 'game.colors.white',
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 32: BLACK
+    Current: 'BLACK': 'game.colors.black',
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 33: FLAME_COLORS
+    Current: 'FLAME_COLORS': 'game.colors.flame_colors',
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 34: LASER_EFFECTS
+    Current: 'LASER_EFFECTS': 'game.effects.laser_effects',
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 35: LETTER_SPAWN_INTERVAL
+    Current: 'LETTER_SPAWN_INTERVAL': 'game.game.letter_spawn_interval',
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 36: SEQUENCES
+    Current: 'SEQUENCES': 'game.sequences',
+    Replace with: config.get('game.sequences')
+
+  Line 37: GAME_MODES
+    Current: 'GAME_MODES': 'game.game_modes',
+    Replace with: config.get('game.game_modes')
+
+  Line 38: GROUP_SIZE
+    Current: 'GROUP_SIZE': 'game.game.group_size'
+    Replace with: config.get('game.game.group_size')
+
+  Line 108: WHITE
+    Current: if setting_name in ['WHITE', 'BLACK']:
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 108: BLACK
+    Current: if setting_name in ['WHITE', 'BLACK']:
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 110: FLAME_COLORS
+    Current: elif setting_name == 'FLAME_COLORS':
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 181: COLORS_COLLISION_DELAY
+    Current: COLORS_COLLISION_DELAY = _config.get('game.game.collision_delay', 250)
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 182: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH = _config.get('game.game.level_progress_path', 'level_progress.txt')
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 183: WHITE
+    Current: WHITE = tuple(_config.get('game.colors.white', [255, 255, 255]))
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 184: BLACK
+    Current: BLACK = tuple(_config.get('game.colors.black', [0, 0, 0]))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 185: FLAME_COLORS
+    Current: FLAME_COLORS = [tuple(color) for color in _config.get('game.colors.flame_colors', [[255, 69, 0], [255, 215, 0], [0, 191, 255]])]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 186: LASER_EFFECTS
+    Current: LASER_EFFECTS = _config.get('game.effects.laser_effects', [])
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 187: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL = _config.get('game.game.letter_spawn_interval', 60)
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 188: SEQUENCES
+    Current: SEQUENCES = _config.get('game.sequences', {})
+    Replace with: config.get('game.sequences')
+
+  Line 189: GAME_MODES
+    Current: GAME_MODES = _config.get('game.game_modes', [])
+    Replace with: config.get('game.game_modes')
+
+  Line 190: GROUP_SIZE
+    Current: GROUP_SIZE = _config.get('game.game.group_size', 5)
+    Replace with: config.get('game.game.group_size')
+
+  Line 195: COLORS_COLLISION_DELAY
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 195: LEVEL_PROGRESS_PATH
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 195: WHITE
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 195: BLACK
+    Current: global COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 196: FLAME_COLORS
+    Current: global FLAME_COLORS, LASER_EFFECTS, LETTER_SPAWN_INTERVAL
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 196: LASER_EFFECTS
+    Current: global FLAME_COLORS, LASER_EFFECTS, LETTER_SPAWN_INTERVAL
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 196: LETTER_SPAWN_INTERVAL
+    Current: global FLAME_COLORS, LASER_EFFECTS, LETTER_SPAWN_INTERVAL
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 197: SEQUENCES
+    Current: global SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.sequences')
+
+  Line 197: GAME_MODES
+    Current: global SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.game_modes')
+
+  Line 197: GROUP_SIZE
+    Current: global SEQUENCES, GAME_MODES, GROUP_SIZE
+    Replace with: config.get('game.game.group_size')
+
+  Line 201: COLORS_COLLISION_DELAY
+    Current: COLORS_COLLISION_DELAY = _config.get('game.game.collision_delay', 250)
+    Replace with: config.get('game.game.collision_delay')
+
+  Line 202: LEVEL_PROGRESS_PATH
+    Current: LEVEL_PROGRESS_PATH = _config.get('game.game.level_progress_path', 'level_progress.txt')
+    Replace with: config.get('game.game.level_progress_path')
+
+  Line 203: WHITE
+    Current: WHITE = tuple(_config.get('game.colors.white', [255, 255, 255]))
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 204: BLACK
+    Current: BLACK = tuple(_config.get('game.colors.black', [0, 0, 0]))
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 205: FLAME_COLORS
+    Current: FLAME_COLORS = [tuple(color) for color in _config.get('game.colors.flame_colors', [[255, 69, 0], [255, 215, 0], [0, 191, 255]])]
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 206: LASER_EFFECTS
+    Current: LASER_EFFECTS = _config.get('game.effects.laser_effects', [])
+    Replace with: config.get('game.effects.laser_effects')
+
+  Line 207: LETTER_SPAWN_INTERVAL
+    Current: LETTER_SPAWN_INTERVAL = _config.get('game.game.letter_spawn_interval', 60)
+    Replace with: config.get('game.game.letter_spawn_interval')
+
+  Line 208: SEQUENCES
+    Current: SEQUENCES = _config.get('game.sequences', {})
+    Replace with: config.get('game.sequences')
+
+  Line 209: GAME_MODES
+    Current: GAME_MODES = _config.get('game.game_modes', [])
+    Replace with: config.get('game.game_modes')
+
+  Line 210: GROUP_SIZE
+    Current: GROUP_SIZE = _config.get('game.game.group_size', 5)
+    Replace with: config.get('game.game.group_size')
+
+  Line 225: GAME_MODES
+    Current: return [mode for mode in GAME_MODES if _config.is_game_mode_enabled(mode)]
+    Replace with: config.get('game.game_modes')
+
+
+File: utils\resource_manager.py
+-------------------------------
+  Line 3: WHITE
+    Current: from settings import SEQUENCES, WHITE, BLACK, FLAME_COLORS
+    Replace with: tuple(config.get('game.colors.white', [255, 255, 255]))
+
+  Line 3: BLACK
+    Current: from settings import SEQUENCES, WHITE, BLACK, FLAME_COLORS
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 3: FLAME_COLORS
+    Current: from settings import SEQUENCES, WHITE, BLACK, FLAME_COLORS
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 3: SEQUENCES
+    Current: from settings import SEQUENCES, WHITE, BLACK, FLAME_COLORS
+    Replace with: config.get('game.sequences')
+
+  Line 82: BLACK
+    Current: center_colors = FLAME_COLORS + [BLACK]  # Include black for shapes mode
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 82: FLAME_COLORS
+    Current: center_colors = FLAME_COLORS + [BLACK]  # Include black for shapes mode
+    Replace with: [tuple(color) for color in config.get('game.colors.flame_colors', [])]
+
+  Line 85: SEQUENCES
+    Current: for mode, sequence in SEQUENCES.items():
+    Replace with: config.get('game.sequences')
+
+  Line 106: BLACK
+    Current: falling_colors = [BLACK, (150, 150, 150)]  # Target and non-target colors
+    Replace with: tuple(config.get('game.colors.black', [255, 255, 255]))
+
+  Line 109: SEQUENCES
+    Current: for mode, sequence in SEQUENCES.items():
+    Replace with: config.get('game.sequences')
+
+
+Total settings usages found: 322
+
+Migration Steps:
+1. Add configuration imports to each file using settings
+2. Replace setting constants with config.get() calls
+3. Test all functionality with new configuration system
+4. Remove or comment out settings.py imports
+
+Benefits of New Configuration System:
+- Teacher-friendly JSON/YAML configuration files
+- Runtime configuration changes without code modification
+- Structured configuration with validation
+- Export/import of teacher customizations
+- Backward compatibility with legacy code

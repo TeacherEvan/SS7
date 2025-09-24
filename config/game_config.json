@@ -1,0 +1,180 @@
+{
+    "game": {
+        "collision_delay": 250,
+        "letter_spawn_interval": 60,
+        "group_size": 5,
+        "level_progress_path": "level_progress.txt"
+    },
+    "colors": {
+        "white": [
+            255,
+            255,
+            255
+        ],
+        "black": [
+            0,
+            0,
+            0
+        ],
+        "flame_colors": [
+            [
+                255,
+                69,
+                0
+            ],
+            [
+                255,
+                215,
+                0
+            ],
+            [
+                0,
+                191,
+                255
+            ]
+        ]
+    },
+    "effects": {
+        "laser_effects": [
+            {
+                "colors": [
+                    [
+                        255,
+                        0,
+                        0
+                    ],
+                    [
+                        255,
+                        128,
+                        0
+                    ]
+                ],
+                "widths": [
+                    3,
+                    5
+                ],
+                "type": "flamethrower"
+            }
+        ]
+    },
+    "sequences": {
+        "alphabet": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z"
+        ],
+        "numbers": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+        ],
+        "clcase": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z"
+        ],
+        "shapes": [
+            "Circle",
+            "Square",
+            "Triangle",
+            "Rectangle",
+            "Pentagon"
+        ],
+        "colors": [
+            "Red",
+            "Blue",
+            "Green",
+            "Yellow",
+            "Purple"
+        ]
+    },
+    "game_modes": [
+        "alphabet",
+        "numbers",
+        "clcase",
+        "shapes",
+        "colors"
+    ],
+    "difficulty": {
+        "easy": {
+            "spawn_interval": 90,
+            "collision_delay": 400,
+            "target_speed": 2
+        },
+        "medium": {
+            "spawn_interval": 60,
+            "collision_delay": 250,
+            "target_speed": 3
+        },
+        "hard": {
+            "spawn_interval": 40,
+            "collision_delay": 150,
+            "target_speed": 4
+        }
+    },
+    "display": {
+        "default_width": 1200,
+        "default_height": 800,
+        "fullscreen": false,
+        "fps": 60
+    },
+    "audio": {
+        "master_volume": 1.0,
+        "voice_volume": 0.8,
+        "music_volume": 0.3,
+        "effects_volume": 0.7
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "elevenlabs_api_key": "",
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "voice_settings": {
+        "stability": 0.75,
+        "similarity_boost": 0.75
+    },
+    "enabled": true,
+    "fallback_to_beeps": true,
+    "voice_volume": 0.8
+}

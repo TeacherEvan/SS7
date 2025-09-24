@@ -1,0 +1,26 @@
+# SS6 Super Student Game - Simple Configuration
+# Keep this simple - just basic game settings
+
+display:
+  # Display mode: DEFAULT or QBOARD
+  mode: DEFAULT
+  fullscreen: false
+
+audio:
+  # Enable/disable sound effects and music
+  sound_effects: true
+  background_music: true
+  voice_announcements: true
+
+game_modes:
+  # Which game modes are available
+  enabled:
+    - alphabet
+    - numbers
+    - shapes
+    - colors
+
+# Simple visual settings
+visual:
+  show_explosions: true
+  show_particles: true

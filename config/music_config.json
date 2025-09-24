@@ -1,0 +1,57 @@
+{
+    "enabled": true,
+    "volume": 0.3,
+    "fade_duration": 2000,
+    "shuffle_tracks": true,
+    "themes": {
+        "alphabet": {
+            "tracks": [
+                "alphabet_song.mp3",
+                "learning_letters.mp3"
+            ],
+            "volume": 0.25
+        },
+        "numbers": {
+            "tracks": [
+                "counting_fun.mp3",
+                "number_dance.mp3"
+            ],
+            "volume": 0.25
+        },
+        "colors": {
+            "tracks": [
+                "rainbow_melody.mp3",
+                "color_symphony.mp3"
+            ],
+            "volume": 0.25
+        },
+        "shapes": {
+            "tracks": [
+                "geometry_groove.mp3",
+                "shape_adventure.mp3"
+            ],
+            "volume": 0.25
+        },
+        "general": {
+            "tracks": [
+                "happy_learning.mp3",
+                "educational_ambient.mp3"
+            ],
+            "volume": 0.3
+        },
+        "menu": {
+            "tracks": [
+                "welcome_theme.mp3",
+                "menu_ambient.mp3"
+            ],
+            "volume": 0.2
+        },
+        "victory": {
+            "tracks": [
+                "celebration.mp3",
+                "success_fanfare.mp3"
+            ],
+            "volume": 0.4
+        }
+    }
+}
