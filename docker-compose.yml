@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # Main SS6 game service
+  ss6-game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ss6-game
+    environment:
+      - DISPLAY=:99
+      - SDL_VIDEODRIVER=dummy
+      - SDL_AUDIODRIVER=dummy
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Mount configuration directory for customization
+      - ./config:/usr/app/config
+      # Mount sounds directory for voice file persistence
+      - ./sounds:/usr/app/sounds
+      # Mount level progress for persistence
+      - ./level_progress.txt:/usr/app/level_progress.txt
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import pygame; pygame.init(); print('OK')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Testing service with mounted source code for development
+  ss6-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ss6-dev
+    environment:
+      - DISPLAY=:99
+      - SDL_VIDEODRIVER=dummy
+      - SDL_AUDIODRIVER=dummy
+      - PYTHONUNBUFFERED=1
+      - PYGAME_HIDE_SUPPORT_PROMPT=1
+    volumes:
+      # Mount entire source code for development
+      - .:/usr/app
+      # Exclude virtual environment to avoid conflicts
+      - /usr/app/venv
+    command: [ "python", "run_tests.py" ]
+    profiles:
+      - dev
+      - testing
+
+  # Headless testing service
+  ss6-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ss6-test
+    environment:
+      - DISPLAY=:99
+      - SDL_VIDEODRIVER=dummy
+      - SDL_AUDIODRIVER=dummy
+      - PYTHONUNBUFFERED=1
+      - PYGAME_HIDE_SUPPORT_PROMPT=1
+    volumes:
+      - ./tests:/usr/app/tests
+      - ./test-results:/usr/app/test-results
+    command: [ "python", "run_tests.py" ]
+    profiles:
+      - testing
+
+  # Sound system testing service
+  ss6-sound-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: ss6-sound-test
+    environment:
+      - DISPLAY=:99
+      - SDL_AUDIODRIVER=dummy
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./sounds:/usr/app/sounds
+    command:
+      - python
+      - -c
+      - |
+        import pygame
+        pygame.init()
+        pygame.mixer.init()
+        from universal_class import SoundManager
+        sm = SoundManager()
+        print('Sound Manager Status:', sm.get_status())
+
+        # Test voice availability
+        test_voices = ['A', 'B', 'C', '1', '2', '3', 'red', 'blue', 'circle', 'square']
+        print('Testing voice availability...')
+        for voice in test_voices:
+            available = sm.ensure_voice_available(voice)
+            print(f'{voice}: {"✅" if available else "❌"}')
+
+        print('Sound system test complete!')
+    profiles:
+      - testing
+      - sound-test
+
+networks:
+  default:
+    name: ss6-network
+
+volumes:
+  ss6-config:
+    driver: local
+  ss6-sounds:
+    driver: local

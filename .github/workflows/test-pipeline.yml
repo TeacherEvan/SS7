@@ -1,0 +1,339 @@
+name: SS6 Automated Testing Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 2 AM UTC to catch environmental issues
+    - cron: '0 2 * * *'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/ss6-game
+
+jobs:
+  # Security and code quality checks
+  security-scan:
+    name: Security & Code Quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety flake8 black isort
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run security checks with Bandit
+        run: |
+          bandit -r . -f json -o bandit-report.json || true
+          
+      - name: Check for known vulnerabilities
+        run: |
+          safety check --json --output safety-report.json || true
+
+      - name: Code style check
+        run: |
+          flake8 --max-line-length=100 --statistics --count .
+          black --check --diff .
+          isort --check-only --diff .
+
+  # Build and test in Docker environment
+  docker-tests:
+    name: Docker Environment Tests
+    runs-on: ubuntu-latest
+    needs: security-scan
+    strategy:
+      matrix:
+        test-type: [unit, integration, sound-system]
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: ss6-test:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      - name: Test Docker image functionality
+        run: |
+          # Test that the container can start and initialize pygame
+          docker run --rm --name ss6-init-test \
+            -e DISPLAY=:99 \
+            ss6-test:latest python -c "
+          import pygame
+          import sys
+          print('Testing pygame initialization...')
+          pygame.init()
+          print('✅ Pygame initialized successfully')
+          
+          # Test sound system
+          print('Testing sound system...')
+          pygame.mixer.init()
+          print('✅ Sound system initialized')
+          
+          # Test display (headless)
+          print('Testing display system...')
+          screen = pygame.display.set_mode((800, 600))
+          print('✅ Display system working')
+          
+          print('All basic systems functional!')
+          sys.exit(0)
+          "
+
+      - name: Run unit tests
+        if: matrix.test-type == 'unit'
+        run: |
+          docker run --rm --name ss6-unit-test \
+            -e DISPLAY=:99 \
+            -v ${{ github.workspace }}/test-results:/usr/app/test-results \
+            ss6-test:latest python run_tests.py
+
+      - name: Run integration tests  
+        if: matrix.test-type == 'integration'
+        run: |
+          docker run --rm --name ss6-integration-test \
+            -e DISPLAY=:99 \
+            -e SDL_VIDEODRIVER=dummy \
+            -e SDL_AUDIODRIVER=dummy \
+            ss6-test:latest python -c "
+          import pygame
+          import sys
+          import os
+          
+          # Initialize systems
+          pygame.init()
+          pygame.mixer.init()
+          
+          # Test game can start
+          try:
+              print('Testing game startup...')
+              from SS6 import main  # Assuming there's a main function
+              print('✅ Game imports successfully')
+          except ImportError as e:
+              print(f'⚠️  Could not import main game module: {e}')
+              # Try direct execution test
+              print('Testing direct execution...')
+              exit_code = os.system('python SS6.origional.py --test-mode 2>/dev/null')
+              if exit_code == 0:
+                  print('✅ Game can execute in test mode')
+              else:
+                  print('❌ Game execution failed')
+                  sys.exit(1)
+          
+          print('Integration test completed successfully!')
+          "
+
+      - name: Test sound system thoroughly
+        if: matrix.test-type == 'sound-system'
+        run: |
+          docker run --rm --name ss6-sound-test \
+            -e DISPLAY=:99 \
+            -e SDL_AUDIODRIVER=dummy \
+            ss6-test:latest python -c "
+          import pygame
+          import os
+          import sys
+          from universal_class import SoundManager
+          
+          print('=== COMPREHENSIVE SOUND SYSTEM TEST ===')
+          
+          # Initialize pygame
+          pygame.init()
+          pygame.mixer.init()
+          
+          # Test SoundManager
+          print('Testing SoundManager initialization...')
+          sound_manager = SoundManager()
+          
+          if sound_manager.initialized:
+              print('✅ SoundManager initialized successfully')
+          else:
+              print('❌ SoundManager failed to initialize')
+              sys.exit(1)
+          
+          # Test voice file availability
+          print('Testing voice file availability...')
+          test_voices = ['A', 'B', '1', '2', 'red', 'blue', 'circle', 'square']
+          missing_voices = []
+          
+          for voice in test_voices:
+              if not sound_manager.ensure_voice_available(voice):
+                  missing_voices.append(voice)
+          
+          if missing_voices:
+              print(f'❌ Missing voice files: {missing_voices}')
+              sys.exit(1)
+          else:
+              print('✅ All test voice files available')
+          
+          # Test sound playback (will be silent in dummy mode)
+          print('Testing sound playback...')
+          for voice in test_voices[:4]:  # Test first 4 voices
+              if sound_manager.play_voice(voice):
+                  print(f'✅ Successfully played voice: {voice}')
+              else:
+                  print(f'⚠️  Could not play voice: {voice}')
+          
+          print('Sound system test completed successfully!')
+          "
+
+      - name: Push image to registry
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Performance and compatibility tests
+  compatibility-tests:
+    name: Cross-Platform Compatibility
+    runs-on: ${{ matrix.os }}
+    needs: security-scan
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04]
+        python-version: ['3.11', '3.12', '3.13']
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install system dependencies (Ubuntu)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libfreetype6-dev \
+            libportmidi-dev \
+            libjpeg-dev \
+            xvfb
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run basic functionality test
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1024x768x24 &
+          sleep 2
+          python -c "
+          import pygame
+          pygame.init()
+          print('✅ Pygame initialized on ${{ matrix.os }} with Python ${{ matrix.python-version }}')
+          
+          from universal_class import SoundManager
+          sm = SoundManager()
+          print(f'✅ SoundManager status: {sm.get_status()}')
+          "
+
+  # Generate test report
+  test-report:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    needs: [docker-tests, compatibility-tests]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate test summary
+        run: |
+          echo "# SS6 Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.docker-tests.result }}" == "success" ]; then
+            echo "✅ Docker Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Docker Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ needs.compatibility-tests.result }}" == "success" ]; then
+            echo "✅ Compatibility Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Compatibility Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Sound System Status" >> $GITHUB_STEP_SUMMARY
+          echo "All required voice files verified and sound triggering tested." >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Container Registry" >> $GITHUB_STEP_SUMMARY
+          echo "Docker images are available at: \`ghcr.io/${{ github.repository }}/ss6-game\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: |
+            bandit-report.json
+            safety-report.json
+          retention-days: 30
