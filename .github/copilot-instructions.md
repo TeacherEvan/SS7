@@ -37,6 +37,44 @@ self.center_target_cache = {}  # Cache for center target (size 900)
 self.falling_object_cache = {}  # Cache for falling objects (size 240)
 ```
 
+### Error Handling Patterns
+
+**Graceful Degradation**: The game should continue functioning even when non-critical components fail:
+```python
+try:
+    voice_generator.generate_voice_file(text, filename)
+except Exception as e:
+    print(f"Voice generation failed, using fallback: {e}")
+    # Continue without voice or use synthetic beep
+```
+
+**Resource Loading**: Always provide fallbacks for missing resources:
+```python
+try:
+    sound = pygame.mixer.Sound(sound_path)
+except pygame.error:
+    # Use silence or generate synthetic sound
+```
+
+**Display Initialization**: Handle display failures gracefully:
+```python
+try:
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+except pygame.error:
+    # Fall back to windowed mode
+    screen = pygame.display.set_mode((800, 600))
+```
+
+**File I/O**: Always handle configuration file errors:
+```python
+try:
+    with open(config_path, 'r') as f:
+        config = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    # Use default configuration
+    config = get_default_config()
+```
+
 ## Development Workflows
 
 **Installation & Setup**:
@@ -54,11 +92,48 @@ python install.py  # Auto-installs pygame, creates Play.bat/Play.sh
 python run_tests.py  # Comprehensive test runner with environment setup
 ```
 
+**Testing Patterns**:
+- **Unit Tests**: Focus on individual manager classes and utility functions
+- **Integration Tests**: Test level initialization and manager interactions
+- **Performance Tests**: Validate frame rates and memory usage on different display modes
+- **Mock External Dependencies**: Use mocks for file I/O, network calls, and system resources
+- **Test Isolation**: Each test should be independent and reset any global state
+- **Coverage**: Aim for high coverage of critical game logic, especially manager classes
+
 **Configuration Architecture**: 
 - **New System**: `config/game_config.json` - Main game settings, `config/teacher_config.yaml` - Teacher customizations
 - **Legacy Bridge**: `settings.py` - Compatibility layer for existing code using old constants
 - **Access Patterns**: Use `get_config_manager()` for new code, legacy constants still work in existing code
 - **Migration**: Settings are automatically migrated from hardcoded values to config files
+
+**Dependency Management**:
+- **Core Dependencies**: pygame>=2.0.0, requests>=2.25.0, pyyaml>=6.0, psutil>=5.8.0
+- **Optional Dependencies**: ElevenLabs API for enhanced voice generation
+- **Installation**: Always use `python install.py` for setup to ensure proper dependency resolution
+- **Compatibility**: Maintain Python 3.6+ compatibility for educational environments
+
+**File Structure Best Practices**:
+```
+SS6/
+├── SS6.origional.py         # Main entry point (never rename)
+├── settings.py              # Legacy settings compatibility
+├── universal_class.py       # Core manager classes
+├── levels/                  # Game mode implementations
+│   ├── __init__.py
+│   ├── alphabet_level.py
+│   ├── numbers_level.py
+│   └── ...
+├── utils/                   # Utility modules
+│   ├── config_manager.py    # New configuration system
+│   ├── resource_manager.py  # Font and resource caching
+│   ├── voice_generator.py   # Text-to-speech system
+│   └── ...
+├── config/                  # Configuration files (some ignored)
+│   ├── game_config.json     # Core settings (tracked)
+│   ├── teacher_config.yaml  # Teacher customizations (tracked)
+│   └── voice_config.json    # API keys (ignored)
+└── sounds/                  # Audio assets (tracked)
+```
 
 **File Dependencies**: 
 - `config/game_config.json` - Core game configuration (auto-created with defaults)
@@ -93,6 +168,14 @@ touch_y = event.y * self.height
 - **Last Resort**: Synthetic beeps (generated if TTS fails)
 Voice files are cached in `sounds/` directory for performance.
 
+**Security Considerations**:
+- **API Keys**: Never commit API keys to version control - use `config/voice_config.json` (ignored by git)
+- **File Paths**: Always validate file paths to prevent directory traversal attacks
+- **User Input**: Sanitize any configuration input to prevent injection attacks
+- **Network Requests**: Use HTTPS only for ElevenLabs API calls with timeout and retry limits
+- **File Permissions**: Ensure game only writes to its own directory structure
+- **Configuration**: Validate configuration values and use safe defaults
+
 **Configuration Access Patterns**: 
 - **New Code**: Use `from utils.config_manager import get_config_manager` then `config = get_config_manager()` and `config.get('path.to.setting', default_value)`
 - **Legacy Code**: Import constants from `settings.py` (e.g., `from settings import SEQUENCES, COLORS`)
@@ -116,6 +199,37 @@ Voice files are cached in `sounds/` directory for performance.
 - **Font Scaling**: ResourceManager.initialize_game_resources() must be called after display mode changes
 
 When adding new levels, follow the existing constructor pattern and ensure all universal managers are properly injected and reset between levels.
+
+## Debugging and Troubleshooting
+
+**Common Issues**:
+- **Import Errors**: Ensure all files are in correct locations and Python path is set
+- **Display Issues**: Check `Display_settings.py` for display mode configuration
+- **Audio Problems**: Verify pygame mixer initialization and file paths
+- **Performance Issues**: Check particle counts and collision detection frequency
+- **Configuration Errors**: Validate JSON/YAML syntax and file permissions
+
+**Debugging Tools**:
+- **Memory Profiler**: Use `utils/memory_profiler.py` to track memory usage
+- **Debug Display**: Enable debug information in `utils/debug_display.py`
+- **Event Tracking**: Monitor game events with `utils/event_tracker.py`
+- **Performance Metrics**: Use frame rate monitoring for optimization
+
+**Logging Patterns**:
+```python
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Use structured logging for debugging
+logger.info(f"Level initialized: {level_name}, particles: {particle_count}")
+```
+
+**Testing Specific Scenarios**:
+- Test with `DISPLAY_MODE = 'QBOARD'` for performance optimization validation
+- Test level transitions and manager state resets
+- Test configuration file loading and fallback scenarios
+- Test multi-touch functionality if available
 
 ## Alphabet Level Emoji Implementation Guide
 
@@ -165,6 +279,35 @@ assets/
 - Smooth animation timing synchronized with particle effects
 - Proper scaling for different display modes
 - Resource pre-loading for performance optimization
+
+## Contributing Guidelines
+
+**Code Quality Standards**:
+- Follow existing code patterns and naming conventions
+- Add type hints for new functions where helpful
+- Include docstrings for complex functions and classes
+- Test new features with the existing test framework
+- Ensure backwards compatibility with existing save files
+
+**Pull Request Guidelines**:
+- Keep changes focused and atomic
+- Test changes on both DEFAULT and QBOARD display modes
+- Verify that existing levels continue to work
+- Run `python run_tests.py` before submitting
+- Document any new configuration options
+
+**Development Environment**:
+- Use Python 3.6+ for compatibility
+- Install dependencies via `python install.py`
+- Test on multiple display resolutions if possible
+- Respect the plug-and-play design philosophy
+
+**Code Review Checklist**:
+- No hardcoded values (use configuration system)
+- Proper error handling with graceful degradation
+- Memory efficient (use object pooling for particles)
+- Performance conscious (cache resources, limit particle counts)
+- Educational focus maintained (simple, distraction-free interface)
 
 ## CRITICAL PROJECT CONSTRAINTS
 
