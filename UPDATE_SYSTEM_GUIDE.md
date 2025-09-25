@@ -7,11 +7,13 @@ The SS6 Super Student Game now includes an automatic update system that connects
 ### 🚀 **How to Update**
 
 #### Option 1: Easy Update (Windows)
+
 1. Double-click `Update_Game.bat`
 2. Follow the on-screen prompts
 3. Updates download and install automatically
 
 #### Option 2: Manual Update (All Platforms)
+
 1. Open terminal/command prompt in game directory
 2. Run: `python update_game.py`
 3. Follow the interactive prompts
@@ -75,22 +77,26 @@ The update system is designed to work in educational environments:
 ### ❓ **Troubleshooting**
 
 **"No internet connection"**
+
 - Check network connectivity
 - Verify firewall settings
 - Try again later
 
 **"Update failed"**
+
 - Game automatically restores from backup
 - No loss of functionality
 - Can retry update process
 
 **"Cannot find update file"**
+
 - Ensure `update_game.py` is in game directory
 - Re-download game if missing files
 
 ### 📞 **Support**
 
 For update issues or questions:
+
 - Check GitHub repository issues page
 - Verify system requirements are met  
 - Ensure stable internet connection during updates

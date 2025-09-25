@@ -1,19 +1,23 @@
 {
-  "version": "1.1.0",
-  "release_date": "2025-01-21",
-  "features": [
-    "Complete emoji visual learning system for Alphabet level",
-    "Comprehensive emoji integration for C/L Case level", 
-    "Enhanced ResourceManager with emoji asset support",
-    "Automatic display detection (DEFAULT/QBOARD modes)",
-    "52 high-quality OpenMoji visual learning assets",
-    "Independent emoji targeting and collision detection",
-    "Multi-touch support for interactive displays"
-  ],
-  "build_info": {
-    "python_version": "3.13+",
-    "pygame_version": "2.0.0+",
-    "emoji_assets": 52,
-    "supported_platforms": ["Windows", "Linux", "macOS"]
-  }
+    "version": "1.1.0",
+    "release_date": "2025-01-21",
+    "features": [
+        "Complete emoji visual learning system for Alphabet level",
+        "Comprehensive emoji integration for C/L Case level",
+        "Enhanced ResourceManager with emoji asset support",
+        "Automatic display detection (DEFAULT/QBOARD modes)",
+        "52 high-quality Open Emoji visual learning assets",
+        "Independent emoji targeting and collision detection",
+        "Multi-touch support for interactive displays"
+    ],
+    "build_info": {
+        "python_version": "3.13+",
+        "pygame_version": "2.0.0+",
+        "emoji_assets": 52,
+        "supported_platforms": [
+            "Windows",
+            "Linux",
+            "macOS"
+        ]
+    }
 }

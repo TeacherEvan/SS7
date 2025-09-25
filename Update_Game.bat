@@ -1,4 +1,6 @@
 @echo off
+REM SS6 Game Updater - Windows Batch Script
+REM Note: %errorlevel% is a standard Windows batch variable for exit codes
 title SS6 Game Updater
 echo.
 echo 🎮 SS6 Super Student Game - Quick Update
