@@ -1,9 +1,11 @@
 import pygame
+import os
+from pathlib import Path
 from Display_settings import FONT_SIZES
 from settings import SEQUENCES, WHITE, BLACK, FLAME_COLORS
 
 class ResourceManager:
-    """Manages game resources like fonts based on display mode."""
+    """Manages game resources like fonts and emoji images based on display mode."""
     
     def __init__(self):
         self.display_mode = "DEFAULT"
@@ -18,6 +20,11 @@ class ResourceManager:
         self.falling_object_cache = {}  # Cache for falling objects (size 240)
         self.center_font = None  # Font for center target (size 900)
         self.falling_font = None  # Font for falling objects (size 240)
+        
+        # Emoji caches for alphabet level
+        self.emoji_cache = {}  # Cache for emoji surfaces
+        self.emoji_associations = self._load_emoji_associations()
+        self.assets_dir = Path(__file__).parent.parent / "assets" / "emojis"
         
     def set_display_mode(self, mode):
         """Set the current display mode."""
@@ -49,6 +56,9 @@ class ResourceManager:
         
         # Pre-cache commonly used text surfaces
         self._initialize_font_caches()
+        
+        # Pre-cache emoji surfaces for alphabet level
+        self._initialize_emoji_caches()
         
         return {
             'fonts': self.fonts,
@@ -160,11 +170,108 @@ class ResourceManager:
         """Clear all font caches to free memory."""
         self.center_target_cache.clear()
         self.falling_object_cache.clear()
+        self.emoji_cache.clear()
         
     def get_cache_stats(self):
         """Get statistics about cache usage."""
         return {
             'center_targets': len(self.center_target_cache),
             'falling_objects': len(self.falling_object_cache),
-            'total_cached_surfaces': len(self.center_target_cache) + len(self.falling_object_cache)
-        } 
+            'emojis': len(self.emoji_cache),
+            'total_cached_surfaces': len(self.center_target_cache) + len(self.falling_object_cache) + len(self.emoji_cache)
+        }
+        
+    def _load_emoji_associations(self):
+        """Load the emoji associations for each letter."""
+        return {
+            'A': ['apple', 'ant'],
+            'B': ['ball', 'banana'],
+            'C': ['cat', 'car'],
+            'D': ['dog', 'duck'],
+            'E': ['elephant', 'egg'],
+            'F': ['fish', 'flower'],
+            'G': ['giraffe', 'grapes'],
+            'H': ['house', 'hat'],
+            'I': ['ice_cream', 'iguana'],
+            'J': ['jar', 'juice'],
+            'K': ['kite', 'key'],
+            'L': ['lion', 'leaf'],
+            'M': ['mouse', 'moon'],
+            'N': ['nest', 'nose'],
+            'O': ['orange', 'owl'],
+            'P': ['penguin', 'pizza'],
+            'Q': ['queen', 'question_mark'],
+            'R': ['rainbow', 'rabbit'],
+            'S': ['sun', 'snake'],
+            'T': ['tree', 'tiger'],
+            'U': ['umbrella', 'unicorn'],
+            'V': ['violin', 'volcano'],
+            'W': ['whale', 'watermelon'],
+            'X': ['x-ray', 'xylophone'],
+            'Y': ['yarn', 'yacht'],
+            'Z': ['zebra', 'zipper']
+        }
+    
+    def _initialize_emoji_caches(self):
+        """Pre-load and cache emoji surfaces for performance."""
+        if not self.assets_dir.exists():
+            print(f"Warning: Emoji assets directory not found: {self.assets_dir}")
+            return
+        
+        print("Loading emoji assets...")
+        loaded_count = 0
+        
+        # Calculate emoji size based on display mode
+        emoji_size = self._get_emoji_size()
+        
+        for letter, emojis in self.emoji_associations.items():
+            for i, emoji_name in enumerate(emojis, 1):
+                filename = f"{letter}_{emoji_name}_{i}.png"
+                filepath = self.assets_dir / filename
+                
+                if filepath.exists():
+                    try:
+                        # Load and scale emoji surface
+                        original_surface = pygame.image.load(str(filepath)).convert_alpha()
+                        scaled_surface = pygame.transform.smoothscale(original_surface, emoji_size)
+                        
+                        # Cache the scaled surface
+                        cache_key = (letter, i)
+                        self.emoji_cache[cache_key] = scaled_surface
+                        loaded_count += 1
+                        
+                    except Exception as e:
+                        print(f"Warning: Failed to load emoji {filename}: {e}")
+                else:
+                    print(f"Warning: Emoji file not found: {filename}")
+        
+        print(f"Loaded {loaded_count} emoji assets")
+    
+    def _get_emoji_size(self):
+        """Get emoji size based on display mode."""
+        # Scale emoji size based on display mode
+        if self.display_mode == "QBOARD":
+            return (64, 64)  # Smaller for QBoard performance
+        else:
+            return (96, 96)  # Standard size for regular displays
+    
+    def get_letter_emojis(self, letter):
+        """Get both emoji surfaces for a given letter."""
+        letter = letter.upper()
+        if letter not in self.emoji_associations:
+            return []
+        
+        emojis = []
+        for i in range(1, 3):  # Get emoji 1 and 2
+            cache_key = (letter, i)
+            if cache_key in self.emoji_cache:
+                emojis.append(self.emoji_cache[cache_key])
+        
+        return emojis
+    
+    def has_emojis_for_letter(self, letter):
+        """Check if emojis are available for a given letter."""
+        letter = letter.upper()
+        return letter in self.emoji_associations and any(
+            (letter, i) in self.emoji_cache for i in range(1, 3)
+        ) 

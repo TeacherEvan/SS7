@@ -129,6 +129,14 @@ class AlphabetLevel:
         self.mouse_press_time = 0
         self.click_count = 0
         
+        # Emoji completion tracking (any order)
+        self.current_target_hits = set()  # Track what's been hit for current target {letter, emoji1, emoji2}
+        self.targets_needed = set()  # What needs to be hit for current target completion
+        
+        # Initialize target tracking for first letter
+        if self.target_letter:
+            self._reset_target_tracking(self.target_letter)
+        
         # Abilities (maintained for compatibility)
         self.abilities = ["laser", "aoe", "charge_up"]
         self.current_ability = "laser"
@@ -225,46 +233,51 @@ class AlphabetLevel:
                         # Flag to track if click hit a target
                         hit_target = False
                         
-                        # Process Click on Target
-                        for letter_obj in self.letters[:]:
-                            if letter_obj["rect"].collidepoint(click_x, click_y):
-                                hit_target = True  # Marked as hit
-                                if letter_obj["value"] == self.target_letter:
+                        # Process Click on Target (letters and emojis)
+                        for obj in self.letters[:]:
+                            if obj["rect"].collidepoint(click_x, click_y):
+                                hit_target = True
+                                
+                                # Check if this object is part of current target
+                                obj_id = obj["value"]
+                                if obj_id in self.targets_needed and obj_id not in self.current_target_hits:
+                                    # Hit a valid target!
+                                    self.current_target_hits.add(obj_id)
                                     self.score += 10
-                                    # Play voice sound for destroyed target
-                                    if self.sound_manager:
-                                        self.sound_manager.play_voice(letter_obj["value"])
+                                    
+                                    # Play voice sound for letters
+                                    if obj.get("type") == "letter" and self.sound_manager:
+                                        self.sound_manager.play_voice(obj["value"])
+                                    
                                     # Common destruction effects
-                                    self.create_explosion(letter_obj["x"], letter_obj["y"])
-                                    self.create_flame_effect(self.player_x, self.player_y - 80, letter_obj["x"], letter_obj["y"])
-                                    self.center_piece_manager.trigger_convergence(letter_obj["x"], letter_obj["y"])
-                                    self.apply_explosion_effect(letter_obj["x"], letter_obj["y"], 150, self.letters)  # Apply push effect
+                                    self.create_explosion(obj["x"], obj["y"])
+                                    self.create_flame_effect(self.player_x, self.player_y - 80, obj["x"], obj["y"])
+                                    self.center_piece_manager.trigger_convergence(obj["x"], obj["y"])
+                                    self.apply_explosion_effect(obj["x"], obj["y"], 150, self.letters)
 
                                     # Add visual feedback particles
                                     for i in range(20):
                                         self.create_particle(
-                                            letter_obj["x"], letter_obj["y"],
+                                            obj["x"], obj["y"],
                                             random.choice(FLAME_COLORS),
                                             random.randint(40, 80),
                                             random.uniform(-2, 2), random.uniform(-2, 2),
                                             20
                                         )
 
-                                    # Remove letter and update counts
-                                    self.letters.remove(letter_obj)
+                                    # Remove object and update counts
+                                    self.letters.remove(obj)
                                     self.letters_destroyed += 1
                                     
                                     # Track target hit event
                                     if self.event_manager:
                                         self.event_manager.get_tracker("gameplay").track_target_hit(
-                                            "letter", letter_obj["value"], 10
+                                            obj.get("type", "unknown"), obj_id, 10
                                         )
 
-                                    # Update target
-                                    if self.target_letter in self.letters_to_target:
-                                        self.letters_to_target.remove(self.target_letter)
-                                    if self.letters_to_target:
-                                        self.target_letter = self.letters_to_target[0]
+                                    # Check if target is complete (letter + both emojis hit)
+                                    if self.current_target_hits == self.targets_needed:
+                                        self._complete_current_target()
 
                                     break  # Exit loop after processing one hit
                                     
@@ -287,40 +300,45 @@ class AlphabetLevel:
                     # Flag to track if touch hit a target
                     hit_target = False
                     
-                    # Process Touch on Target
-                    for letter_obj in self.letters[:]:
-                        if letter_obj["rect"].collidepoint(touch_x, touch_y):
-                            hit_target = True  # Marked as hit
-                            if letter_obj["value"] == self.target_letter:
+                    # Process Touch on Target (letters and emojis)
+                    for obj in self.letters[:]:
+                        if obj["rect"].collidepoint(touch_x, touch_y):
+                            hit_target = True
+                            
+                            # Check if this object is part of current target
+                            obj_id = obj["value"]
+                            if obj_id in self.targets_needed and obj_id not in self.current_target_hits:
+                                # Hit a valid target!
+                                self.current_target_hits.add(obj_id)
                                 self.score += 10
-                                # Play voice sound for destroyed target
-                                if self.sound_manager:
-                                    self.sound_manager.play_voice(letter_obj["value"])
+                                
+                                # Play voice sound for letters
+                                if obj.get("type") == "letter" and self.sound_manager:
+                                    self.sound_manager.play_voice(obj["value"])
+                                
                                 # Common destruction effects
-                                self.create_explosion(letter_obj["x"], letter_obj["y"])
-                                self.create_flame_effect(self.player_x, self.player_y - 80, letter_obj["x"], letter_obj["y"])
-                                self.center_piece_manager.trigger_convergence(letter_obj["x"], letter_obj["y"])
-                                self.apply_explosion_effect(letter_obj["x"], letter_obj["y"], 150, self.letters)  # Apply push effect
+                                self.create_explosion(obj["x"], obj["y"])
+                                self.create_flame_effect(self.player_x, self.player_y - 80, obj["x"], obj["y"])
+                                self.center_piece_manager.trigger_convergence(obj["x"], obj["y"])
+                                self.apply_explosion_effect(obj["x"], obj["y"], 150, self.letters)
 
                                 # Add visual feedback particles
                                 for i in range(20):
                                     self.create_particle(
-                                        letter_obj["x"], letter_obj["y"],
+                                        obj["x"], obj["y"],
                                         random.choice(FLAME_COLORS),
                                         random.randint(40, 80),
                                         random.uniform(-2, 2), random.uniform(-2, 2),
                                         20
                                     )
 
-                                # Remove letter and update counts
-                                self.letters.remove(letter_obj)
+                                # Remove object and update counts
+                                self.letters.remove(obj)
                                 self.letters_destroyed += 1
 
-                                # Update target
-                                if self.target_letter in self.letters_to_target:
-                                    self.letters_to_target.remove(self.target_letter)
-                                if self.letters_to_target:
-                                    self.target_letter = self.letters_to_target[0]
+                                # Check if target is complete (letter + both emojis hit)
+                                if self.current_target_hits == self.targets_needed:
+                                    self._complete_current_target()
 
                                 break  # Exit loop after processing one hit
             
@@ -336,23 +354,144 @@ class AlphabetLevel:
         return True
         
     def _spawn_letters(self):
-        """Handle spawning of falling letters."""
+        """Handle spawning of falling letters and associated emojis."""
+        # Spawn letters from the list
         if self.letters_to_spawn:
             if self.frame_count % LETTER_SPAWN_INTERVAL == 0:
                 # Use a generic key "value" for letters
                 item_value = self.letters_to_spawn.pop(0)
+                
+                # Spawn the letter
                 letter_obj = {
                     "value": item_value,
                     "x": random.randint(50, self.width - 50),
                     "y": -50,
-                    "rect": pygame.Rect(0, 0, 0, 0),  # Will be updated when drawn                    "size": 240,  # Fixed size (doubled from 120 to 240 for 100% increase)
+                    "rect": pygame.Rect(0, 0, 0, 0),  # Will be updated when drawn
+                    "size": 240,  # Fixed size (doubled from 120 to 240 for 100% increase)
                     "dx": random.choice([-1, -0.5, 0.5, 1]) * 1.5,  # Slightly faster horizontal drift
                     "dy": random.choice([10, 5.5]) * 1.5 * 1.2,  # 20% faster fall speed
                     "can_bounce": False,  # Start without bouncing
-                    "mass": random.uniform(140, 160)  # Give items mass for collisions
+                    "mass": random.uniform(140, 160),  # Give items mass for collisions
+                    "type": "letter"  # Mark as letter type
                 }
                 self.letters.append(letter_obj)
                 self.letters_spawned += 1
+        
+        # Always ensure emojis are available for the current target
+        self._ensure_target_emojis_available()
+    
+    def _spawn_emojis_for_letter(self, letter):
+        """Spawn independent emoji objects for the given letter."""
+        emojis = self.resource_manager.get_letter_emojis(letter)
+        
+        for i, emoji_surface in enumerate(emojis):
+            if emoji_surface is not None:
+                # Create independent emoji object
+                emoji_obj = {
+                    "value": f"{letter}_emoji_{i+1}",
+                    "letter": letter,  # Associated letter
+                    "emoji_index": i + 1,
+                    "x": random.randint(100, self.width - 100),
+                    "y": random.randint(-300, -100),  # Spawn higher up
+                    "rect": pygame.Rect(0, 0, 0, 0),
+                    "size": 96,  # Emoji size
+                    "dx": random.choice([-1, -0.5, 0.5, 1]) * 1.2,
+                    "dy": random.choice([8, 6]) * 1.2,  # Slightly slower than letters
+                    "can_bounce": False,
+                    "mass": random.uniform(100, 120),
+                    "type": "emoji",
+                    "surface": emoji_surface,
+                    "hit": False  # Track if this emoji has been hit
+                }
+                self.letters.append(emoji_obj)  # Add to same list for physics
+    
+    def _ensure_target_emojis_available(self):
+        """Ensure emojis are continuously available for the current target letter."""
+        if not self.target_letter or not self.targets_needed:
+            return
+        
+        # Only spawn emojis occasionally to avoid spam (every 60 frames = ~1 second)
+        if self.frame_count % 60 != 0:
+            return
+        
+        # Get current objects on screen
+        current_objects = {obj["value"] for obj in self.letters}
+        
+        # Ensure the target letter exists on screen (if not hit yet)
+        if self.target_letter not in self.current_target_hits and self.target_letter not in current_objects:
+            # Spawn target letter
+            letter_obj = {
+                "value": self.target_letter,
+                "x": random.randint(50, self.width - 50),
+                "y": -50,
+                "rect": pygame.Rect(0, 0, 0, 0),
+                "size": 240,
+                "dx": random.choice([-1, -0.5, 0.5, 1]) * 1.5,
+                "dy": random.choice([10, 5.5]) * 1.5 * 1.2,
+                "can_bounce": False,
+                "mass": random.uniform(140, 160),
+                "type": "letter"
+            }
+            self.letters.append(letter_obj)
+        
+        # Ensure both emojis exist on screen (if not hit yet)
+        for target_id in self.targets_needed:
+            if target_id.startswith(f"{self.target_letter}_emoji_") and target_id not in self.current_target_hits:
+                if target_id not in current_objects:
+                    # Spawn this missing emoji
+                    emoji_index = int(target_id.split("_")[-1])  # Get 1 or 2
+                    emojis = self.resource_manager.get_letter_emojis(self.target_letter)
+                    
+                    if emoji_index <= len(emojis):
+                        emoji_surface = emojis[emoji_index - 1]  # Convert to 0-based index
+                        if emoji_surface is not None:
+                            emoji_obj = {
+                                "value": target_id,
+                                "letter": self.target_letter,
+                                "emoji_index": emoji_index,
+                                "x": random.randint(100, self.width - 100),
+                                "y": random.randint(-300, -100),
+                                "rect": pygame.Rect(0, 0, 0, 0),
+                                "size": 96,
+                                "dx": random.choice([-1, -0.5, 0.5, 1]) * 1.2,
+                                "dy": random.choice([8, 6]) * 1.2,
+                                "can_bounce": False,
+                                "mass": random.uniform(100, 120),
+                                "type": "emoji",
+                                "surface": emoji_surface,
+                                "hit": False
+                            }
+                            self.letters.append(emoji_obj)
+    
+    def _reset_target_tracking(self, target_letter):
+        """Reset tracking for a new target letter."""
+        self.current_target_hits.clear()
+        self.targets_needed = {
+            target_letter,  # The letter itself
+            f"{target_letter}_emoji_1",  # First emoji
+            f"{target_letter}_emoji_2"   # Second emoji
+        }
+    
+    def _complete_current_target(self):
+        """Handle completion of current target (letter + both emojis hit)."""
+        # Move to next target in the group
+        if self.target_letter in self.letters_to_target:
+            self.letters_to_target.remove(self.target_letter)
+        
+        if self.letters_to_target:
+            # Move to next letter in current group
+            self.target_letter = self.letters_to_target[0]
+            # Reset tracking for the new target
+            self._reset_target_tracking(self.target_letter)
+            # Immediately spawn emojis for the new target
+            self._spawn_emojis_for_letter(self.target_letter)
+        else:
+            # Current group complete - clear current targets
+            self.current_target_hits.clear()
+            self.targets_needed.clear()
+            
+            # Trigger level progression to handle next group setup
+            # This will be handled in the main update loop via _handle_level_progression
         
     def _update_letters(self):
         """Update letter positions and handle collisions."""
@@ -479,6 +618,10 @@ class AlphabetLevel:
                 self.letters_to_target = self.current_group.copy()
                 if self.letters_to_target:
                      self.target_letter = self.letters_to_target[0]
+                     # Set up target tracking for the new letter
+                     self._reset_target_tracking(self.target_letter)
+                     # Immediately spawn emojis for the new target
+                     self._spawn_emojis_for_letter(self.target_letter)
                 else:
                      print(f"Warning: Group {self.current_group_index} is empty.")
                      # Handle this case - maybe skip group or end game?
@@ -534,38 +677,60 @@ class AlphabetLevel:
         # Draw Center Piece (Swirl Particles + Target Display)
         self.center_piece_manager.update_and_draw(self.screen, self.target_letter, "alphabet", offset_x, offset_y)
 
-        # Update and Draw Falling Letters
-        for letter_obj in self.letters[:]:
-            # Draw the Letter
-            draw_pos_x = int(letter_obj["x"] + offset_x)
-            draw_pos_y = int(letter_obj["y"] + offset_y)
+        # Update and Draw Falling Objects (Letters and Emojis)
+        for obj in self.letters[:]:
+            draw_pos_x = int(obj["x"] + offset_x)
+            draw_pos_y = int(obj["y"] + offset_y)
 
-            # Draw text for Alphabet using cached fonts for performance
-            display_value = letter_obj["value"]
+            if obj.get("type") == "letter":
+                # Draw Letter
+                display_value = obj["value"]
+                
+                # Greek alpha special case for alphabet mode
+                if obj["value"] == "a":
+                    display_value = "α"
 
-            # Greek alpha special case for alphabet mode
-            if letter_obj["value"] == "a":
-                display_value = "α"
-
-            # Use gray for non-target letters, black for the target letter
-            text_color = BLACK if letter_obj["value"] == self.target_letter else (150, 150, 150)
-            
-            # PERFORMANCE OPTIMIZATION: Use cached font surface if available
-            try:
-                cached_surface = self.resource_manager.get_falling_object_surface("alphabet", letter_obj["value"], text_color)
-                text_rect = cached_surface.get_rect(center=(draw_pos_x, draw_pos_y))
-                # Inflate rect by 50% for easier interaction (25 pixels on each side)
-                interaction_rect = text_rect.inflate(50, 50)
-                letter_obj["rect"] = interaction_rect
-                self.screen.blit(cached_surface, text_rect)
-            except:
-                # Fallback: Original rendering method
-                text_surface = self.target_font.render(display_value, True, text_color)
-                text_rect = text_surface.get_rect(center=(draw_pos_x, draw_pos_y))
-                # Inflate rect by 50% for easier interaction (25 pixels on each side)
-                interaction_rect = text_rect.inflate(50, 50)
-                letter_obj["rect"] = interaction_rect
-                self.screen.blit(text_surface, text_rect)
+                # Highlight if this is part of current target
+                is_target = obj["value"] in self.targets_needed
+                text_color = BLACK if is_target else (150, 150, 150)
+                
+                # PERFORMANCE OPTIMIZATION: Use cached font surface if available
+                try:
+                    cached_surface = self.resource_manager.get_falling_object_surface("alphabet", obj["value"], text_color)
+                    text_rect = cached_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+                    # Inflate rect by 50% for easier interaction (25 pixels on each side)
+                    interaction_rect = text_rect.inflate(50, 50)
+                    obj["rect"] = interaction_rect
+                    self.screen.blit(cached_surface, text_rect)
+                except:
+                    # Fallback: Original rendering method
+                    text_surface = self.target_font.render(display_value, True, text_color)
+                    text_rect = text_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+                    # Inflate rect by 50% for easier interaction (25 pixels on each side)
+                    interaction_rect = text_rect.inflate(50, 50)
+                    obj["rect"] = interaction_rect
+                    self.screen.blit(text_surface, text_rect)
+                    
+            elif obj.get("type") == "emoji":
+                # Draw Emoji
+                emoji_surface = obj.get("surface")
+                if emoji_surface:
+                    # Highlight if this is part of current target
+                    is_target = obj["value"] in self.targets_needed
+                    
+                    if is_target:
+                        # Full opacity for target emojis
+                        emoji_rect = emoji_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+                        self.screen.blit(emoji_surface, emoji_rect)
+                    else:
+                        # Reduced opacity for non-target emojis
+                        emoji_copy = emoji_surface.copy()
+                        emoji_copy.set_alpha(128)  # 50% transparency
+                        emoji_rect = emoji_copy.get_rect(center=(draw_pos_x, draw_pos_y))
+                        self.screen.blit(emoji_copy, emoji_rect)
+                    
+                    # Set collision rect (larger for easier clicking)
+                    obj["rect"] = emoji_rect.inflate(20, 20)
 
         # Process Flamethrower Effects
         self.flamethrower_manager.update()

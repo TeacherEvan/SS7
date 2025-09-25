@@ -9,6 +9,8 @@ SS6 is a pygame-based educational game with a **dependency injection** architect
 - **Main Entry Point**: `SS6.origional.py` - Initializes all managers and orchestrates the game loop
 - **Universal Managers**: `universal_class.py` - Contains 6 key managers (MultiTouchManager, GlassShatterManager, HUDManager, CheckpointManager, FlamethrowerManager, CenterPieceManager)
 - **Level System**: `levels/` - Each game mode is a separate class with consistent constructor patterns
+- **Configuration System**: `utils/config_manager.py` - New JSON/YAML-based configuration with teacher customization support
+- **Settings Layer**: `settings.py` - Compatibility layer bridging old hardcoded constants to new config system
 - **Resource Management**: `utils/resource_manager.py` - Handles font caching and display-aware resource scaling
 - **Display Adaptation**: `Display_settings.py` - Manages DEFAULT vs QBOARD display modes with different performance profiles
 - **Voice System**: `utils/voice_generator.py` - Handles text-to-speech generation using Windows SAPI with ElevenLabs fallback
@@ -47,11 +49,23 @@ python install.py  # Auto-installs pygame, creates Play.bat/Play.sh
 - Direct: `python SS6.origional.py`
 - Entry point is always `SS6.origional.py`, NOT a main.py
 
+**Testing & Validation**:
+```bash
+python run_tests.py  # Comprehensive test runner with environment setup
+```
+
+**Configuration Architecture**: 
+- **New System**: `config/game_config.json` - Main game settings, `config/teacher_config.yaml` - Teacher customizations
+- **Legacy Bridge**: `settings.py` - Compatibility layer for existing code using old constants
+- **Access Patterns**: Use `get_config_manager()` for new code, legacy constants still work in existing code
+- **Migration**: Settings are automatically migrated from hardcoded values to config files
+
 **File Dependencies**: 
-- `settings.py` - Game constants (SEQUENCES, COLORS, GAME_MODES)
+- `config/game_config.json` - Core game configuration (auto-created with defaults)
+- `config/teacher_config.yaml` - Teacher customizations (sequences, difficulty, enabled modes)
+- `config/voice_config.json` - Voice system configuration (ElevenLabs API key, TTS settings)
 - `Display_settings.py` - Display modes and performance settings
 - `level_progress.txt` - Persistent game state (auto-created)
-- `config/voice_config.json` - Voice system configuration (ElevenLabs API key, TTS settings)
 - `sounds/*.wav` - Audio files generated via Windows TTS or ElevenLabs API
 
 ## Project-Specific Conventions
@@ -78,6 +92,12 @@ touch_y = event.y * self.height
 - **Fallback**: Windows SAPI Text-to-Speech (automatic, no setup required)
 - **Last Resort**: Synthetic beeps (generated if TTS fails)
 Voice files are cached in `sounds/` directory for performance.
+
+**Configuration Access Patterns**: 
+- **New Code**: Use `from utils.config_manager import get_config_manager` then `config = get_config_manager()` and `config.get('path.to.setting', default_value)`
+- **Legacy Code**: Import constants from `settings.py` (e.g., `from settings import SEQUENCES, COLORS`)
+- **Teacher Customizations**: Use `config.get_custom_sequence(type)` and `config.is_game_mode_enabled(mode)`
+- **Runtime Updates**: Call `config.reload()` or `settings.refresh_settings()` to pick up config file changes
 
 **Alphabet Level Enhancement Requirements**: 
 - **Visual Emoji Integration**: Each letter (A-Z) must drop down with 2 PNG emoji representations

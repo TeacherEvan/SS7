@@ -198,6 +198,17 @@ assets/temp/
 assets/*.psd
 assets/*.ai
 assets/*.sketch
+assets/emojis_backup/  # Backup of placeholder emojis
+
+# Emoji generation and scraping
+scrape_web_emojis.py  # Temporary scraping script
+generate_emoji_assets.py  # Temporary placeholder generator
+
+# Development and testing files
+test_*.py  # Temporary test files
+debug_*.py  # Debug scripts
+profile_*.py  # Profiling scripts
+benchmark_*.py  # Benchmark scripts
 
 # Performance profiling output
 *.prof
@@ -205,4 +216,141 @@ profile_*.txt
 
 # Development debugging files
 debug_*.log
-debug_output/ 
+debug_output/
+
+# Windows batch files (auto-generated)
+Play.bat  # Auto-generated launcher
+*.bat.backup
+
+# Development tools and temporary files
+TODO.md
+NOTES.md
+scratch_*.py
+temp_*.py
+
+# MCP and AI assistant files
+.mcp/
+.cursor/
+.windsurf/
+.cliner/
+
+# Additional Python cache directories
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Additional OS files
+*.lnk  # Windows shortcuts
+.fuse_hidden*  # Linux FUSE
+.nfs*  # NFS temporary files
+
+# Additional temporary files
+*.swp
+*.swo
+*.tmp
+*.temp
+*.bak
+*.orig
+*~
+
+# Lock files
+*.lock
+poetry.lock  # If using Poetry
+pipenv.lock  # Pipenv lock file
+
+# Environment variables
+.env.local
+.env.development
+.env.staging
+.env.production
+
+# ==============================================================================
+# ADDITIONAL BEST PRACTICES
+# ==============================================================================
+
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux specific files
+*-
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows specific files (additional)
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Editor backup files
+*~
+*.backup
+*.bak
+*.orig
+*.rej
+*.swp
+*.swo
+.#*
+#*#
+
+# Archive files
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.war
+*.ear
+*.nar
+*.jar
+
+# Log files
+*.log
+logs/
+log/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+*.database
+
+# Node.js (if ever needed for tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
+id_ecdsa*
+id_ed25519*
+
+# Security and secrets
+secrets/
+.secrets/
+*.secret
+api_keys.txt
+credentials.json
+auth_keys.json 
