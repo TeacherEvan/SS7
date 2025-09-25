@@ -1,7 +1,7 @@
 SS6 Docker Test Results
-Overall: 4/6 passed
+Overall: 5/6 passed
 Pygame Initialization: PASS
-Sound System: FAIL
+Sound System: PASS
 Game Modules: PASS
 Configuration System: PASS
 Resource Management: FAIL
