@@ -1,0 +1,430 @@
+{
+  "total_files": 48,
+  "categories": {
+    "uppercase_letters": {
+      "expected_count": 26,
+      "found_count": 18,
+      "missing_files": [
+        "A.wav",
+        "B.wav",
+        "C.wav",
+        "D.wav",
+        "E.wav",
+        "F.wav",
+        "G.wav",
+        "H.wav"
+      ],
+      "file_details": {
+        "I.wav": {
+          "duration": 1.16,
+          "file_size": 51398,
+          "size_kb": 50.2,
+          "quality_rating": "Excellent"
+        },
+        "J.wav": {
+          "duration": 1.25,
+          "file_size": 55366,
+          "size_kb": 54.1,
+          "quality_rating": "Excellent"
+        },
+        "K.wav": {
+          "duration": 1.24,
+          "file_size": 54704,
+          "size_kb": 53.4,
+          "quality_rating": "Excellent"
+        },
+        "L.wav": {
+          "duration": 1.3,
+          "file_size": 57350,
+          "size_kb": 56.0,
+          "quality_rating": "Excellent"
+        },
+        "M.wav": {
+          "duration": 1.3,
+          "file_size": 57350,
+          "size_kb": 56.0,
+          "quality_rating": "Excellent"
+        },
+        "N.wav": {
+          "duration": 1.3,
+          "file_size": 57350,
+          "size_kb": 56.0,
+          "quality_rating": "Excellent"
+        },
+        "O.wav": {
+          "duration": 1.16,
+          "file_size": 51398,
+          "size_kb": 50.2,
+          "quality_rating": "Excellent"
+        },
+        "P.wav": {
+          "duration": 1.24,
+          "file_size": 54704,
+          "size_kb": 53.4,
+          "quality_rating": "Excellent"
+        },
+        "Q.wav": {
+          "duration": 1.39,
+          "file_size": 61320,
+          "size_kb": 59.9,
+          "quality_rating": "Excellent"
+        },
+        "R.wav": {
+          "duration": 1.32,
+          "file_size": 58232,
+          "size_kb": 56.9,
+          "quality_rating": "Excellent"
+        },
+        "S.wav": {
+          "duration": 1.36,
+          "file_size": 59996,
+          "size_kb": 58.6,
+          "quality_rating": "Excellent"
+        },
+        "T.wav": {
+          "duration": 1.24,
+          "file_size": 54926,
+          "size_kb": 53.6,
+          "quality_rating": "Excellent"
+        },
+        "U.wav": {
+          "duration": 1.34,
+          "file_size": 59114,
+          "size_kb": 57.7,
+          "quality_rating": "Excellent"
+        },
+        "V.wav": {
+          "duration": 1.25,
+          "file_size": 55146,
+          "size_kb": 53.9,
+          "quality_rating": "Excellent"
+        },
+        "W.wav": {
+          "duration": 1.65,
+          "file_size": 72778,
+          "size_kb": 71.1,
+          "quality_rating": "Good"
+        },
+        "X.wav": {
+          "duration": 1.39,
+          "file_size": 61320,
+          "size_kb": 59.9,
+          "quality_rating": "Excellent"
+        },
+        "Y.wav": {
+          "duration": 1.27,
+          "file_size": 56028,
+          "size_kb": 54.7,
+          "quality_rating": "Excellent"
+        },
+        "Z.wav": {
+          "duration": 1.25,
+          "file_size": 55146,
+          "size_kb": 53.9,
+          "quality_rating": "Excellent"
+        }
+      },
+      "duration_stats": {
+        "min": 1.16,
+        "max": 1.65,
+        "mean": 1.3,
+        "median": 1.28,
+        "std_dev": 0.11
+      },
+      "quality_issues": []
+    },
+    "lowercase_letters": {
+      "expected_count": 26,
+      "found_count": 8,
+      "missing_files": [
+        "i.wav",
+        "j.wav",
+        "k.wav",
+        "l.wav",
+        "m.wav",
+        "n.wav",
+        "o.wav",
+        "p.wav",
+        "q.wav",
+        "r.wav",
+        "s.wav",
+        "t.wav",
+        "u.wav",
+        "v.wav",
+        "w.wav",
+        "x.wav",
+        "y.wav",
+        "z.wav"
+      ],
+      "file_details": {
+        "a.wav": {
+          "duration": 1.16,
+          "file_size": 51398,
+          "size_kb": 50.2,
+          "quality_rating": "Excellent"
+        },
+        "b.wav": {
+          "duration": 1.25,
+          "file_size": 55146,
+          "size_kb": 53.9,
+          "quality_rating": "Excellent"
+        },
+        "c.wav": {
+          "duration": 1.3,
+          "file_size": 57350,
+          "size_kb": 56.0,
+          "quality_rating": "Excellent"
+        },
+        "d.wav": {
+          "duration": 1.25,
+          "file_size": 55146,
+          "size_kb": 53.9,
+          "quality_rating": "Excellent"
+        },
+        "e.wav": {
+          "duration": 1.16,
+          "file_size": 51398,
+          "size_kb": 50.2,
+          "quality_rating": "Excellent"
+        },
+        "f.wav": {
+          "duration": 1.32,
+          "file_size": 58232,
+          "size_kb": 56.9,
+          "quality_rating": "Excellent"
+        },
+        "g.wav": {
+          "duration": 1.25,
+          "file_size": 55366,
+          "size_kb": 54.1,
+          "quality_rating": "Excellent"
+        },
+        "h.wav": {
+          "duration": 1.37,
+          "file_size": 60438,
+          "size_kb": 59.0,
+          "quality_rating": "Excellent"
+        }
+      },
+      "duration_stats": {
+        "min": 1.16,
+        "max": 1.37,
+        "mean": 1.26,
+        "median": 1.25,
+        "std_dev": 0.07
+      },
+      "quality_issues": []
+    },
+    "numbers": {
+      "expected_count": 10,
+      "found_count": 10,
+      "missing_files": [],
+      "file_details": {
+        "1.wav": {
+          "duration": 1.39,
+          "file_size": 61320,
+          "size_kb": 59.9,
+          "quality_rating": "Excellent"
+        },
+        "2.wav": {
+          "duration": 1.24,
+          "file_size": 54926,
+          "size_kb": 53.6,
+          "quality_rating": "Excellent"
+        },
+        "3.wav": {
+          "duration": 1.37,
+          "file_size": 60436,
+          "size_kb": 59.0,
+          "quality_rating": "Excellent"
+        },
+        "4.wav": {
+          "duration": 1.4,
+          "file_size": 61978,
+          "size_kb": 60.5,
+          "quality_rating": "Excellent"
+        },
+        "5.wav": {
+          "duration": 1.47,
+          "file_size": 64846,
+          "size_kb": 63.3,
+          "quality_rating": "Excellent"
+        },
+        "6.wav": {
+          "duration": 1.5,
+          "file_size": 66390,
+          "size_kb": 64.8,
+          "quality_rating": "Good"
+        },
+        "7.wav": {
+          "duration": 1.51,
+          "file_size": 66830,
+          "size_kb": 65.3,
+          "quality_rating": "Good"
+        },
+        "8.wav": {
+          "duration": 1.28,
+          "file_size": 56468,
+          "size_kb": 55.1,
+          "quality_rating": "Excellent"
+        },
+        "9.wav": {
+          "duration": 1.44,
+          "file_size": 63744,
+          "size_kb": 62.2,
+          "quality_rating": "Excellent"
+        },
+        "10.wav": {
+          "duration": 1.4,
+          "file_size": 61760,
+          "size_kb": 60.3,
+          "quality_rating": "Excellent"
+        }
+      },
+      "duration_stats": {
+        "min": 1.24,
+        "max": 1.51,
+        "mean": 1.4,
+        "median": 1.4,
+        "std_dev": 0.09
+      },
+      "quality_issues": []
+    },
+    "colors": {
+      "expected_count": 5,
+      "found_count": 5,
+      "missing_files": [],
+      "file_details": {
+        "red.wav": {
+          "duration": 1.34,
+          "file_size": 59114,
+          "size_kb": 57.7,
+          "quality_rating": "Excellent"
+        },
+        "blue.wav": {
+          "duration": 1.34,
+          "file_size": 59336,
+          "size_kb": 57.9,
+          "quality_rating": "Excellent"
+        },
+        "green.wav": {
+          "duration": 1.45,
+          "file_size": 63964,
+          "size_kb": 62.5,
+          "quality_rating": "Excellent"
+        },
+        "yellow.wav": {
+          "duration": 1.44,
+          "file_size": 63524,
+          "size_kb": 62.0,
+          "quality_rating": "Excellent"
+        },
+        "purple.wav": {
+          "duration": 1.53,
+          "file_size": 67490,
+          "size_kb": 65.9,
+          "quality_rating": "Good"
+        }
+      },
+      "duration_stats": {
+        "min": 1.34,
+        "max": 1.53,
+        "mean": 1.42,
+        "median": 1.44,
+        "std_dev": 0.08
+      },
+      "quality_issues": []
+    },
+    "shapes": {
+      "expected_count": 5,
+      "found_count": 5,
+      "missing_files": [],
+      "file_details": {
+        "circle.wav": {
+          "duration": 1.52,
+          "file_size": 67050,
+          "size_kb": 65.5,
+          "quality_rating": "Good"
+        },
+        "square.wav": {
+          "duration": 1.51,
+          "file_size": 66610,
+          "size_kb": 65.0,
+          "quality_rating": "Good"
+        },
+        "triangle.wav": {
+          "duration": 1.67,
+          "file_size": 73884,
+          "size_kb": 72.2,
+          "quality_rating": "Good"
+        },
+        "rectangle.wav": {
+          "duration": 1.71,
+          "file_size": 75648,
+          "size_kb": 73.9,
+          "quality_rating": "Good"
+        },
+        "pentagon.wav": {
+          "duration": 1.79,
+          "file_size": 78956,
+          "size_kb": 77.1,
+          "quality_rating": "Good"
+        }
+      },
+      "duration_stats": {
+        "min": 1.51,
+        "max": 1.79,
+        "mean": 1.64,
+        "median": 1.67,
+        "std_dev": 0.12
+      },
+      "quality_issues": []
+    },
+    "effects": {
+      "expected_count": 2,
+      "found_count": 2,
+      "missing_files": [],
+      "file_details": {
+        "explosion.wav": {
+          "duration": 0.3,
+          "file_size": 52964,
+          "size_kb": 51.7,
+          "quality_rating": "Good"
+        },
+        "laser.wav": {
+          "duration": 0.2,
+          "file_size": 35324,
+          "size_kb": 34.5,
+          "quality_rating": "Needs Improvement"
+        }
+      },
+      "duration_stats": {
+        "min": 0.2,
+        "max": 0.3,
+        "mean": 0.25,
+        "median": 0.25,
+        "std_dev": 0.07
+      },
+      "quality_issues": [
+        "explosion.wav: Too short (0.30s)",
+        "laser.wav: Too short (0.20s)"
+      ]
+    }
+  },
+  "quality_metrics": {
+    "overall_duration_range": "0.20s - 1.79s",
+    "average_duration": "1.32s",
+    "duration_consistency": "Good",
+    "average_file_size": "58.2 KB",
+    "total_quality_issues": 28,
+    "overall_quality_score": 0
+  },
+  "issues": [],
+  "recommendations": [
+    "\ud83d\udea8 CRITICAL: 26 expected audio files are missing",
+    "\ud83d\udd27 2 files have quality issues that need attention",
+    "\ud83d\udcda Consider regenerating low-quality pronunciation files for better learning experience",
+    "\u2705 Use consistent pronunciation timing (0.7-1.5s) for educational effectiveness",
+    "\ud83c\udfaf Ensure clear articulation for all letter/number pronunciations"
+  ]
+}
