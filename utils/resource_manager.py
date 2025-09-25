@@ -233,6 +233,7 @@ class ResourceManager:
                     try:
                         # Load and scale emoji surface
                         original_surface = pygame.image.load(str(filepath)).convert_alpha()
+                        # pygame.transform.smoothscale provides high-quality image scaling
                         scaled_surface = pygame.transform.smoothscale(original_surface, emoji_size)
                         
                         # Cache the scaled surface
@@ -256,22 +257,24 @@ class ResourceManager:
             return (96, 96)  # Standard size for regular displays
     
     def get_letter_emojis(self, letter):
-        """Get both emoji surfaces for a given letter."""
-        letter = letter.upper()
-        if letter not in self.emoji_associations:
+        """Get both emoji surfaces for a given letter (handles both uppercase and lowercase)."""
+        # Convert to uppercase for emoji lookup since emoji filenames use uppercase
+        letter_key = letter.upper()
+        if letter_key not in self.emoji_associations:
             return []
         
         emojis = []
         for i in range(1, 3):  # Get emoji 1 and 2
-            cache_key = (letter, i)
+            cache_key = (letter_key, i)
             if cache_key in self.emoji_cache:
                 emojis.append(self.emoji_cache[cache_key])
         
         return emojis
     
     def has_emojis_for_letter(self, letter):
-        """Check if emojis are available for a given letter."""
-        letter = letter.upper()
-        return letter in self.emoji_associations and any(
-            (letter, i) in self.emoji_cache for i in range(1, 3)
+        """Check if emojis are available for a given letter (handles both uppercase and lowercase)."""
+        # Convert to uppercase for emoji lookup since emoji filenames use uppercase
+        letter_key = letter.upper()
+        return letter_key in self.emoji_associations and any(
+            (letter_key, i) in self.emoji_cache for i in range(1, 3)
         ) 

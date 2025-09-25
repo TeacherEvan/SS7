@@ -84,6 +84,10 @@ class CLCaseLevel:
         # Game state variables
         self.reset_level_state()
         
+        # Emoji system for visual learning
+        self.emoji_objects = []  # Independent emoji targets
+        self.targets_needed = {}  # Track what targets are needed: {'letter': count, 'emoji1': count, 'emoji2': count}
+        
     def reset_level_state(self):
         """Reset all level-specific state variables."""
         # Group progression variables
@@ -108,7 +112,12 @@ class CLCaseLevel:
         # Game state
         self.letters = []  # items on screen
         self.letters_to_spawn = self.current_group.copy()
+        self.emoji_objects = []  # emoji targets on screen
+        self.targets_needed = {}  # Track what targets are needed for completion
         self.frame_count = 0
+        
+        # Initialize target tracking for the current group
+        self._reset_target_tracking()
         self.game_started = False
         self.last_click_time = 0
         self.player_x = self.width // 2
@@ -128,6 +137,121 @@ class CLCaseLevel:
         self.multi_touch_manager.reset()
         self.flamethrower_manager.clear()
         self.center_piece_manager.reset()
+
+    def _reset_target_tracking(self):
+        """Reset target tracking for the current target letter."""
+        if self.target_letter:
+            # Each target letter needs: the letter itself + 2 emojis
+            self.targets_needed = {
+                self.target_letter: 1,
+                f"{self.target_letter}_emoji1": 1,
+                f"{self.target_letter}_emoji2": 1
+            }
+        else:
+            self.targets_needed = {}
+
+    def _complete_current_target(self):
+        """Complete the current target and move to next letter."""
+        if self.target_letter in self.letters_to_target:
+            self.letters_to_target.remove(self.target_letter)
+        
+        if self.letters_to_target:
+            self.target_letter = self.letters_to_target[0]
+            self._reset_target_tracking()
+        else:
+            # Group is complete
+            self.targets_needed = {}
+            self.target_letter = None
+
+    def _is_current_target_complete(self):
+        """Check if all required targets for current letter are hit."""
+        if not self.targets_needed:
+            return True
+        return all(count == 0 for count in self.targets_needed.values())
+
+    def _ensure_target_emojis_available(self):
+        """Ensure emoji targets are available on screen when needed."""
+        if not self.target_letter or not self.resource_manager.has_emojis_for_letter(self.target_letter):
+            return
+        
+        # Only spawn emojis every 60 frames (about 1.2 seconds at 50 FPS) to avoid overwhelming
+        if self.frame_count % 60 != 0:
+            return
+        
+        # Check what emoji targets are missing from screen
+        emoji_types_on_screen = set()
+        for emoji_obj in self.emoji_objects:
+            if emoji_obj["letter"] == self.target_letter:
+                emoji_types_on_screen.add(emoji_obj["emoji_type"])
+        
+        # Spawn missing emoji targets
+        for emoji_type in ["emoji1", "emoji2"]:
+            target_key = f"{self.target_letter}_{emoji_type}"
+            if (self.targets_needed.get(target_key, 0) > 0 and 
+                emoji_type not in emoji_types_on_screen):
+                self._spawn_emoji_target(self.target_letter, emoji_type)
+
+    def _spawn_emoji_target(self, letter, emoji_type):
+        """Spawn an emoji target for the given letter and type."""
+        emojis = self.resource_manager.get_letter_emojis(letter)
+        if not emojis:
+            return
+        
+        emoji_index = 0 if emoji_type == "emoji1" else 1
+        if emoji_index >= len(emojis):
+            return
+        
+        emoji_surface = emojis[emoji_index]
+        emoji_obj = {
+            "letter": letter,
+            "emoji_type": emoji_type,
+            "surface": emoji_surface,
+            "x": random.randint(50, self.width - 50),
+            "y": -50,
+            "rect": pygame.Rect(0, 0, 0, 0),  # Will be updated when drawn
+            "dx": random.choice([-1, -0.5, 0.5, 1]) * 1.5,
+            "dy": random.choice([5, 10.5]) * 1.5 * 1.2,  # Same speed as letters
+            "can_bounce": False,
+            "mass": random.uniform(40, 60)
+        }
+        self.emoji_objects.append(emoji_obj)
+
+    def _update_emojis(self):
+        """Update emoji positions and physics."""
+        for emoji_obj in self.emoji_objects[:]:
+            emoji_obj["x"] += emoji_obj["dx"]
+            emoji_obj["y"] += emoji_obj["dy"]
+            
+            # Bouncing logic (same as letters)
+            if not emoji_obj["can_bounce"] and emoji_obj["y"] > self.height // 5:
+                emoji_obj["can_bounce"] = True
+            
+            if emoji_obj["can_bounce"]:
+                bounce_dampening = 0.8
+                
+                # Get emoji size for bounds checking
+                emoji_size = emoji_obj["surface"].get_width()
+                
+                # Left/Right Walls
+                if emoji_obj["x"] <= 0 + emoji_size/2:
+                    emoji_obj["x"] = 0 + emoji_size/2
+                    emoji_obj["dx"] = abs(emoji_obj["dx"]) * bounce_dampening
+                elif emoji_obj["x"] >= self.width - emoji_size/2:
+                    emoji_obj["x"] = self.width - emoji_size/2
+                    emoji_obj["dx"] = -abs(emoji_obj["dx"]) * bounce_dampening
+                
+                # Top/Bottom Walls
+                if emoji_obj["y"] <= 0 + emoji_size/2:
+                    emoji_obj["y"] = 0 + emoji_size/2
+                    emoji_obj["dy"] = abs(emoji_obj["dy"]) * bounce_dampening
+                elif emoji_obj["y"] >= self.height - emoji_size/2:
+                    emoji_obj["y"] = self.height - emoji_size/2
+                    emoji_obj["dy"] = -abs(emoji_obj["dy"]) * bounce_dampening
+                    emoji_obj["dx"] *= bounce_dampening
+                    if emoji_obj["x"] < self.width / 2:
+                        emoji_obj["dx"] += random.uniform(0.1, 0.3)
+                    else:
+                        emoji_obj["dx"] -= random.uniform(0.1, 0.3)
 
     def run(self):
         """
@@ -160,12 +284,14 @@ class CLCaseLevel:
             if not running:
                 break
                 
-            # Spawn letters
+            # Spawn letters and emojis
             if self.game_started:
                 self._spawn_letters()
+                self._ensure_target_emojis_available()
             
-            # Update letters and collisions
+            # Update letters, emojis and collisions
             self._update_letters()
+            self._update_emojis()
             
             # Draw frame
             self._draw_frame(stars)
@@ -256,7 +382,7 @@ class CLCaseLevel:
         # Flag to track if click hit a target
         hit_target = False
         
-        # Process click on target
+        # Process click on letter targets
         for letter_obj in self.letters[:]:
             if letter_obj["rect"].collidepoint(click_x, click_y):
                 hit_target = True
@@ -281,18 +407,63 @@ class CLCaseLevel:
                             20
                         )
                     
-                    # Remove letter and update counts
+                    # Remove letter and update target tracking
                     self.letters.remove(letter_obj)
                     self.letters_destroyed += 1
-                      # Update target
-                    if self.target_letter in self.letters_to_target:
-                        self.letters_to_target.remove(self.target_letter)
-                    if self.letters_to_target:
-                        self.target_letter = self.letters_to_target[0]
+                    
+                    # Mark letter target as completed
+                    if self.target_letter in self.targets_needed:
+                        self.targets_needed[self.target_letter] = 0
+                    
+                    # Check if current target is complete
+                    if self._is_current_target_complete():
+                        self._complete_current_target()
                     break
                 else:
                     # Add feedback for clicking wrong target - shake removed
                     pass
+        
+        # Process click on emoji targets
+        if not hit_target:
+            for emoji_obj in self.emoji_objects[:]:
+                if emoji_obj["rect"].collidepoint(click_x, click_y):
+                    # Check if this emoji belongs to the current target letter
+                    if emoji_obj["letter"] == self.target_letter:
+                        hit_target = True
+                        self.score += 5  # Emojis worth 5 points
+                        
+                        # Play voice sound for the letter this emoji represents
+                        if self.sound_manager:
+                            self.sound_manager.play_voice(emoji_obj["letter"])
+                        
+                        # Common destruction effects
+                        self.create_explosion(emoji_obj["x"], emoji_obj["y"])
+                        self.create_flame_effect(self.player_x, self.player_y - 80, emoji_obj["x"], emoji_obj["y"])
+                        self.center_piece_manager.trigger_convergence(emoji_obj["x"], emoji_obj["y"])
+                        self.apply_explosion_effect(emoji_obj["x"], emoji_obj["y"], 150, self.emoji_objects)
+                        
+                        # Add visual feedback particles
+                        for i in range(15):
+                            self.create_particle(
+                                emoji_obj["x"], emoji_obj["y"],
+                                random.choice(FLAME_COLORS),
+                                random.randint(30, 60),
+                                random.uniform(-1.5, 1.5), random.uniform(-1.5, 1.5),
+                                15
+                            )
+                        
+                        # Remove emoji and update target tracking
+                        self.emoji_objects.remove(emoji_obj)
+                        
+                        # Mark emoji target as completed
+                        target_key = f"{emoji_obj['letter']}_{emoji_obj['emoji_type']}"
+                        if target_key in self.targets_needed:
+                            self.targets_needed[target_key] = 0
+                        
+                        # Check if current target is complete
+                        if self._is_current_target_complete():
+                            self._complete_current_target()
+                        break
         
         # If no target was hit, add a crack to the screen
         if not hit_target and self.game_started:
@@ -353,6 +524,8 @@ class CLCaseLevel:
         
         # Handle collisions
         self._handle_letter_collisions()
+        self._handle_emoji_collisions()
+        self._handle_letter_emoji_collisions()
 
     def _handle_letter_collisions(self):
         """Handle collisions between letters with physics."""
@@ -398,6 +571,93 @@ class CLCaseLevel:
                         letter_obj2["dx"] += impulse * letter_obj1["mass"] * nx * bounce_factor
                         letter_obj2["dy"] += impulse * letter_obj1["mass"] * ny * bounce_factor
 
+    def _handle_emoji_collisions(self):
+        """Handle collisions between emoji objects."""
+        collision_frequency = 3  # Check every 3 frames for performance
+        if self.frame_count % collision_frequency == 0:
+            for i, emoji1 in enumerate(self.emoji_objects):
+                for j in range(i + 1, len(self.emoji_objects)):
+                    emoji2 = self.emoji_objects[j]
+                    dx = emoji2["x"] - emoji1["x"]
+                    dy = emoji2["y"] - emoji1["y"]
+                    distance_sq = dx*dx + dy*dy
+                    
+                    # Collision radius calculation
+                    radius1 = emoji1["surface"].get_width() / 2
+                    radius2 = emoji2["surface"].get_width() / 2
+                    min_distance = radius1 + radius2
+                    min_distance_sq = min_distance * min_distance
+                    
+                    if distance_sq < min_distance_sq and distance_sq > 0:
+                        distance = math.sqrt(distance_sq)
+                        # Normalize collision vector
+                        nx = dx / distance
+                        ny = dy / distance
+                        
+                        # Resolve interpenetration
+                        overlap = min_distance - distance
+                        total_mass = emoji1["mass"] + emoji2["mass"]
+                        push_factor = overlap / total_mass
+                        emoji1["x"] -= nx * push_factor * emoji2["mass"]
+                        emoji1["y"] -= ny * push_factor * emoji2["mass"]
+                        emoji2["x"] += nx * push_factor * emoji1["mass"]
+                        emoji2["y"] += ny * push_factor * emoji1["mass"]
+                        
+                        # Calculate collision response
+                        dvx = emoji1["dx"] - emoji2["dx"]
+                        dvy = emoji1["dy"] - emoji2["dy"]
+                        dot_product = dvx * nx + dvy * ny
+                        impulse = (2 * dot_product) / total_mass
+                        bounce_factor = 0.85
+                        
+                        emoji1["dx"] -= impulse * emoji2["mass"] * nx * bounce_factor
+                        emoji1["dy"] -= impulse * emoji2["mass"] * ny * bounce_factor
+                        emoji2["dx"] += impulse * emoji1["mass"] * nx * bounce_factor
+                        emoji2["dy"] += impulse * emoji1["mass"] * ny * bounce_factor
+
+    def _handle_letter_emoji_collisions(self):
+        """Handle collisions between letters and emojis."""
+        collision_frequency = 3  # Check every 3 frames for performance
+        if self.frame_count % collision_frequency == 0:
+            for letter_obj in self.letters:
+                for emoji_obj in self.emoji_objects:
+                    dx = emoji_obj["x"] - letter_obj["x"]
+                    dy = emoji_obj["y"] - letter_obj["y"]
+                    distance_sq = dx*dx + dy*dy
+                    
+                    # Collision radius calculation
+                    letter_radius = letter_obj.get("size", self.target_font.get_height()) / 1.8
+                    emoji_radius = emoji_obj["surface"].get_width() / 2
+                    min_distance = letter_radius + emoji_radius
+                    min_distance_sq = min_distance * min_distance
+                    
+                    if distance_sq < min_distance_sq and distance_sq > 0:
+                        distance = math.sqrt(distance_sq)
+                        # Normalize collision vector
+                        nx = dx / distance
+                        ny = dy / distance
+                        
+                        # Resolve interpenetration
+                        overlap = min_distance - distance
+                        total_mass = letter_obj["mass"] + emoji_obj["mass"]
+                        push_factor = overlap / total_mass
+                        letter_obj["x"] -= nx * push_factor * emoji_obj["mass"]
+                        letter_obj["y"] -= ny * push_factor * emoji_obj["mass"]
+                        emoji_obj["x"] += nx * push_factor * letter_obj["mass"]
+                        emoji_obj["y"] += ny * push_factor * letter_obj["mass"]
+                        
+                        # Calculate collision response
+                        dvx = letter_obj["dx"] - emoji_obj["dx"]
+                        dvy = letter_obj["dy"] - emoji_obj["dy"]
+                        dot_product = dvx * nx + dvy * ny
+                        impulse = (2 * dot_product) / total_mass
+                        bounce_factor = 0.85
+                        
+                        letter_obj["dx"] -= impulse * emoji_obj["mass"] * nx * bounce_factor
+                        letter_obj["dy"] -= impulse * emoji_obj["mass"] * ny * bounce_factor
+                        emoji_obj["dx"] += impulse * letter_obj["mass"] * nx * bounce_factor
+                        emoji_obj["dy"] += impulse * letter_obj["mass"] * ny * bounce_factor
+
     def _handle_checkpoint_logic(self):
         """
         Handle checkpoint display logic.
@@ -442,8 +702,9 @@ class CLCaseLevel:
         Returns:
             None if level continues, bool if level should exit
         """
-        # Check if the current group is finished
-        if not self.letters and not self.letters_to_spawn and self.letters_to_target == []:
+        # Check if the current group is finished (no more letters, emojis, or targets)
+        if (not self.letters and not self.letters_to_spawn and 
+            not self.emoji_objects and self.letters_to_target == []):
             self.total_destroyed += self.letters_destroyed
             self.current_group_index += 1
             self.just_completed_level = True
@@ -455,6 +716,7 @@ class CLCaseLevel:
                 self.letters_to_target = self.current_group.copy()
                 if self.letters_to_target:
                     self.target_letter = self.letters_to_target[0]
+                    self._reset_target_tracking()  # Set up emoji targets for new letter
                 else:
                     print(f"Warning: Group {self.current_group_index} is empty.")
                     return False
@@ -495,8 +757,9 @@ class CLCaseLevel:
         # Draw center piece (swirl particles + target display)
         self.center_piece_manager.update_and_draw(self.screen, self.target_letter, "clcase", offset_x, offset_y)
         
-        # Update and draw falling letters
+        # Update and draw falling letters and emojis
         self._update_and_draw_letters(offset_x, offset_y)
+        self._update_and_draw_emojis(offset_x, offset_y)
         
         # Process flamethrower effects
         self.flamethrower_manager.update()
@@ -561,6 +824,33 @@ class CLCaseLevel:
                 interaction_rect = text_rect.inflate(50, 50)
                 letter_obj["rect"] = interaction_rect
                 self.screen.blit(text_surface, text_rect)
+
+    def _update_and_draw_emojis(self, offset_x, offset_y):
+        """Update and draw falling emoji targets."""
+        for emoji_obj in self.emoji_objects:
+            # Draw the emoji
+            draw_pos_x = int(emoji_obj["x"] + offset_x)
+            draw_pos_y = int(emoji_obj["y"] + offset_y)
+            
+            # Get emoji surface
+            emoji_surface = emoji_obj["surface"]
+            emoji_rect = emoji_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+            
+            # Create interaction rect (slightly larger for easier clicking)
+            interaction_rect = emoji_rect.inflate(20, 20)
+            emoji_obj["rect"] = interaction_rect
+            
+            # Apply visual feedback for current target
+            if emoji_obj["letter"] == self.target_letter:
+                # Add subtle glow effect for current target emojis
+                glow_surface = pygame.Surface((emoji_rect.width + 10, emoji_rect.height + 10), pygame.SRCALPHA)
+                glow_color = (*random.choice(FLAME_COLORS), 60)  # Semi-transparent glow
+                pygame.draw.rect(glow_surface, glow_color, glow_surface.get_rect(), border_radius=15)
+                glow_rect = glow_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+                self.screen.blit(glow_surface, glow_rect)
+            
+            # Draw the emoji
+            self.screen.blit(emoji_surface, emoji_rect)
 
     def _process_lasers(self, offset_x, offset_y):
         """Process legacy laser effects."""
