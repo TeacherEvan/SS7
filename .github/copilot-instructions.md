@@ -79,6 +79,15 @@ touch_y = event.y * self.height
 - **Last Resort**: Synthetic beeps (generated if TTS fails)
 Voice files are cached in `sounds/` directory for performance.
 
+**Alphabet Level Enhancement Requirements**: 
+- **Visual Emoji Integration**: Each letter (A-Z) must drop down with 2 PNG emoji representations
+- **Letter-Emoji Association**: Use standard associations (A=Apple, B=Ball, C=Cat, etc.)
+- **Asset Structure**: Store emoji PNGs in `assets/emojis/` directory organized by letter
+- **Pronunciation Integration**: Play letter pronunciation immediately when target is hit
+- **Visual Feedback**: Emojis should animate alongside letters with matching timing
+- **Resource Loading**: Pre-cache emoji surfaces in ResourceManager for performance
+- **Display Scaling**: Emojis must scale appropriately for DEFAULT vs QBOARD display modes
+
 ## Key Integration Points
 
 - **Pygame Event Loop**: Multi-touch (FINGERDOWN/UP/MOTION) + mouse + keyboard in `SS6.origional.py`
@@ -87,6 +96,55 @@ Voice files are cached in `sounds/` directory for performance.
 - **Font Scaling**: ResourceManager.initialize_game_resources() must be called after display mode changes
 
 When adding new levels, follow the existing constructor pattern and ensure all universal managers are properly injected and reset between levels.
+
+## Alphabet Level Emoji Implementation Guide
+
+**Asset Organization**:
+```
+assets/
+├── emojis/
+│   ├── A_apple_1.png
+│   ├── A_apple_2.png
+│   ├── B_ball_1.png
+│   ├── B_ball_2.png
+│   └── ... (continuing for all 26 letters)
+```
+
+**Standard Letter-Emoji Associations**:
+- A: Apple, Ant
+- B: Ball, Banana
+- C: Cat, Car
+- D: Dog, Duck
+- E: Elephant, Egg
+- F: Fish, Flower
+- G: Giraffe, Grapes
+- H: House, Hat
+- I: Ice Cream, Iguana
+- J: Jar, Juice
+- K: Kite, Key
+- L: Lion, Leaf
+- M: Mouse, Moon
+- N: Nest, Nose
+- O: Orange, Owl
+- P: Penguin, Pizza
+- Q: Queen, Question Mark
+- R: Rainbow, Rabbit
+- S: Sun, Snake
+- T: Tree, Tiger
+- U: Umbrella, Unicorn
+- V: Violin, Volcano
+- W: Whale, Watermelon
+- X: X-ray, Xylophone
+- Y: Yarn, Yacht
+- Z: Zebra, Zipper
+
+**Implementation Requirements**:
+- Emojis drop simultaneously with letters
+- Both emojis appear for each letter target
+- Voice pronunciation triggers on successful letter hit
+- Smooth animation timing synchronized with particle effects
+- Proper scaling for different display modes
+- Resource pre-loading for performance optimization
 
 ## CRITICAL PROJECT CONSTRAINTS
 

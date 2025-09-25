@@ -31,7 +31,8 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
+# Keep SS6.spec as it's our custom build configuration
+# *.spec
 
 # Installer logs
 pip-log.txt
@@ -134,7 +135,11 @@ dmypy.json
 *.bak
 
 # Generated sound files (auto-created by Windows TTS/ElevenLabs)
-sounds/*.wav
+# Note: Keep existing sound files for distribution, only ignore cache
+sounds/voice_cache/
+# Temporary sound generation files
+sounds/*.tmp
+sounds/*.temp
 
 # IDE files
 .vscode/
@@ -153,4 +158,51 @@ ehthumbs.db
 Thumbs.db
 
 # Snapshots directory (contains AI interaction snapshots)
-.snapshots/ 
+.snapshots/
+
+# SS6 Project Specific Files
+# ===========================
+
+# PyInstaller output directories
+build/
+dist/
+
+# Release packages
+*.zip
+SuperStudent-*.zip
+SuperStudent-*.exe
+
+# Game state files (user-specific, should not be in repo)
+level_progress.txt
+display_settings.txt
+
+# Configuration files with sensitive data
+config/voice_config.json
+config/*_secret.json
+config/api_keys.json
+
+# Virtual environment (if using venv in project)
+.venv/
+venv/
+
+# Backup files from config migrations
+*_backup.json
+*_migration_report.txt
+
+# Testing artifacts
+test_results/
+coverage_reports/
+
+# Asset creation temp files
+assets/temp/
+assets/*.psd
+assets/*.ai
+assets/*.sketch
+
+# Performance profiling output
+*.prof
+profile_*.txt
+
+# Development debugging files
+debug_*.log
+debug_output/ 
