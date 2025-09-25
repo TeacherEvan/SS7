@@ -133,6 +133,9 @@ dmypy.json
 *.tmp
 *.bak
 
+# Generated sound files (auto-created by Windows TTS/ElevenLabs)
+sounds/*.wav
+
 # IDE files
 .vscode/
 .idea/

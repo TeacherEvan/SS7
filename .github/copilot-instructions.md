@@ -11,6 +11,8 @@ SS6 is a pygame-based educational game with a **dependency injection** architect
 - **Level System**: `levels/` - Each game mode is a separate class with consistent constructor patterns
 - **Resource Management**: `utils/resource_manager.py` - Handles font caching and display-aware resource scaling
 - **Display Adaptation**: `Display_settings.py` - Manages DEFAULT vs QBOARD display modes with different performance profiles
+- **Voice System**: `utils/voice_generator.py` - Handles text-to-speech generation using Windows SAPI with ElevenLabs fallback
+- **Sound Management**: `sounds/` - Contains all audio files (voices, effects) with Windows TTS-generated pronunciation
 
 ### Critical Patterns
 
@@ -49,6 +51,8 @@ python install.py  # Auto-installs pygame, creates Play.bat/Play.sh
 - `settings.py` - Game constants (SEQUENCES, COLORS, GAME_MODES)
 - `Display_settings.py` - Display modes and performance settings
 - `level_progress.txt` - Persistent game state (auto-created)
+- `config/voice_config.json` - Voice system configuration (ElevenLabs API key, TTS settings)
+- `sounds/*.wav` - Audio files generated via Windows TTS or ElevenLabs API
 
 ## Project-Specific Conventions
 
@@ -68,6 +72,12 @@ touch_y = event.y * self.height
 **Level Progression**: Games use `SEQUENCES` dict from settings.py for content (alphabet, numbers, shapes, etc.) and progress in `GROUP_SIZE` chunks.
 
 **Color Standards**: Use `FLAME_COLORS` from settings.py for consistent visual theming across all game elements.
+
+**Voice Generation**: The game uses a multi-tier voice system:
+- **Primary**: ElevenLabs API (requires API key in `config/voice_config.json`)
+- **Fallback**: Windows SAPI Text-to-Speech (automatic, no setup required)
+- **Last Resort**: Synthetic beeps (generated if TTS fails)
+Voice files are cached in `sounds/` directory for performance.
 
 ## Key Integration Points
 

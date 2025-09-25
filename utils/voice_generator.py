@@ -1,6 +1,6 @@
 """
-ElevenLabs voice generation utility for SS6 Super Student Game.
-Generates realistic British female voice recordings for educational content.
+Voice generation utility for SS6 Super Student Game.
+Generates realistic voice recordings using ElevenLabs API or Windows TTS fallback.
 """
 
 import os
@@ -9,6 +9,17 @@ import requests
 import pygame
 from typing import Dict, List, Optional
 import logging
+
+# Import Windows TTS fallback
+try:
+    from .windows_tts import WindowsTTSGenerator
+    WINDOWS_TTS_AVAILABLE = True
+except ImportError:
+    try:
+        from utils.windows_tts import WindowsTTSGenerator
+        WINDOWS_TTS_AVAILABLE = True
+    except ImportError:
+        WINDOWS_TTS_AVAILABLE = False
 
 class ElevenLabsVoiceGenerator:
     """
@@ -296,6 +307,87 @@ class VoiceManager:
             self.load_sound(sound)
 
 
+class UniversalVoiceGenerator:
+    """
+    Universal voice generator that tries ElevenLabs first, then falls back to Windows TTS.
+    """
+    
+    def __init__(self):
+        """Initialize the universal voice generator."""
+        self.sounds_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sounds")
+        self.logger = logging.getLogger(__name__)
+        
+        # Initialize generators
+        self.elevenlabs_generator = ElevenLabsVoiceGenerator()
+        self.windows_tts_generator = None
+        
+        self.logger.info(f"WINDOWS_TTS_AVAILABLE: {WINDOWS_TTS_AVAILABLE}")
+        
+        if WINDOWS_TTS_AVAILABLE:
+            try:
+                self.windows_tts_generator = WindowsTTSGenerator(self.sounds_dir)
+                self.logger.info("WindowsTTSGenerator created successfully")
+            except Exception as e:
+                self.logger.error(f"Error creating WindowsTTSGenerator: {e}")
+        
+        # Check which generators are available
+        self.elevenlabs_available = bool(self.elevenlabs_generator.api_key)
+        self.windows_tts_available = (
+            self.windows_tts_generator and 
+            self.windows_tts_generator.is_available()
+        )
+        
+        self.logger.info(f"Voice generators available:")
+        self.logger.info(f"  ElevenLabs: {'✓' if self.elevenlabs_available else '✗'}")
+        self.logger.info(f"  Windows TTS: {'✓' if self.windows_tts_available else '✗'}")
+    
+    def generate_voice_file(self, text: str, filename: str) -> bool:
+        """
+        Generate a voice file using the best available method.
+        
+        Args:
+            text: Text to convert to speech
+            filename: Output filename (without extension)
+            
+        Returns:
+            bool: True if successful
+        """
+        # Try ElevenLabs first (highest quality)
+        if self.elevenlabs_available:
+            self.logger.info(f"Trying ElevenLabs for: {filename}")
+            if self.elevenlabs_generator.generate_voice(text, filename):
+                return True
+            else:
+                self.logger.warning(f"ElevenLabs failed for {filename}, trying Windows TTS")
+        
+        # Fall back to Windows TTS
+        if self.windows_tts_available:
+            self.logger.info(f"Using Windows TTS for: {filename}")
+            return self.windows_tts_generator.generate_voice_wav(text, filename)
+        
+        # No voice generation available
+        self.logger.error(f"No voice generation available for: {filename}")
+        return False
+    
+    def generate_all_game_voices(self) -> Dict[str, bool]:
+        """Generate all voice files needed for the game."""
+        if self.windows_tts_available:
+            # Use Windows TTS for all files - it's more reliable and faster
+            self.logger.info("Using Windows TTS to generate all game voices")
+            return self.windows_tts_generator.generate_all_game_voices()
+        elif self.elevenlabs_available:
+            # Fall back to ElevenLabs
+            self.logger.info("Using ElevenLabs to generate all game voices")
+            return self.elevenlabs_generator.generate_all_game_voices()
+        else:
+            self.logger.error("No voice generation methods available")
+            return {}
+    
+    def is_available(self) -> bool:
+        """Check if any voice generation method is available."""
+        return self.elevenlabs_available or self.windows_tts_available
+
+
 def setup_voice_config():
     """
     Setup voice configuration file for API key.
@@ -313,14 +405,15 @@ def setup_voice_config():
                 "stability": 0.75,
                 "similarity_boost": 0.75
             },
-            "enabled": True
+            "enabled": True,
+            "fallback_to_windows_tts": True
         }
         
         with open(config_path, 'w') as f:
             json.dump(config, f, indent=2)
             
         print(f"Created voice config file at: {config_path}")
-        print("Please add your ElevenLabs API key to enable voice generation.")
+        print("Windows TTS will be used as fallback voice generation.")
         
     return config_path
 
@@ -329,10 +422,11 @@ if __name__ == "__main__":
     # Setup and test voice generation
     setup_voice_config()
     
-    generator = ElevenLabsVoiceGenerator()
+    # Use the universal generator
+    generator = UniversalVoiceGenerator()
     
-    if generator.test_voice_generation():
-        print("Voice generation test successful!")
+    if generator.is_available():
+        print("Voice generation system available!")
         
         # Generate all game voices
         results = generator.generate_all_game_voices()
@@ -348,4 +442,4 @@ if __name__ == "__main__":
                 if not success:
                     print(f"  - {filename}")
     else:
-        print("Voice generation test failed. Please check your API key and internet connection.")
+        print("No voice generation methods available. Please install Windows TTS or add ElevenLabs API key.")

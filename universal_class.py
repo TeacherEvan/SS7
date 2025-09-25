@@ -1492,10 +1492,14 @@ class SoundManager:
                 return False
             
         try:
-            # Stop any currently playing voice to prevent overlap
-            pygame.mixer.stop()  # Stop all sounds to ensure voice clarity
-            self.voice_sounds[voice_name].play()
+            # Stop only voice sounds to prevent overlap, but don't stop all sounds
+            # Instead of stopping everything, let's just play the voice
+            channel = self.voice_sounds[voice_name].play()
             print(f"🔊 Playing voice: {voice_name}")
+            
+            if channel is None:
+                print(f"⚠️ No available channel to play voice: {voice_name}")
+                return False
             
             # Track successful voice play
             if self.event_tracker:
@@ -1563,8 +1567,8 @@ class SoundManager:
         """Lazy initialization of voice generator."""
         if self.voice_generator is None:
             try:
-                from utils.voice_generator import VoiceGenerator
-                self.voice_generator = VoiceGenerator()
+                from utils.voice_generator import UniversalVoiceGenerator
+                self.voice_generator = UniversalVoiceGenerator()
             except ImportError:
                 print("⚠️ VoiceGenerator not available, voice generation disabled")
                 self.voice_generator = False  # Mark as unavailable
