@@ -1406,7 +1406,7 @@ class SoundManager:
         try:
             # Check if mixer is already initialized
             if pygame.mixer.get_init():
-                print("✅ Sound system already initialized, using existing mixer")
+                print("[OK] Sound system already initialized, using existing mixer")
                 self.initialized = True
                 if self.event_tracker:
                     self.event_tracker.track_initialization(
