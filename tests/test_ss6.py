@@ -9,9 +9,14 @@ import os
 import sys
 import tempfile
 import json
-import yaml
 from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
+
+# Import yaml with fallback handling
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 # Add the project root to the path so we can import modules
 project_root = Path(__file__).parent.parent
@@ -178,13 +183,11 @@ class TestConfigurationSystem(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.config_path = Path(self.temp_dir)
     
-    def tearDown(self):
-        """Clean up test environment."""
-        import shutil
-        shutil.rmtree(self.temp_dir, ignore_errors=True)
-    
     def test_yaml_config_loading(self):
         """Test YAML configuration loading."""
+        if yaml is None:
+            self.skipTest("PyYAML not available")
+            
         # Create test config
         test_config = {
             'display': {'mode': 'DEFAULT', 'fullscreen': False},
@@ -196,6 +199,11 @@ class TestConfigurationSystem(unittest.TestCase):
             yaml.dump(test_config, f)
         
         # Load and verify
+        with open(config_file, 'r') as f:
+            loaded_config = yaml.safe_load(f)
+        
+        self.assertEqual(loaded_config['display']['mode'], 'DEFAULT')
+        self.assertTrue(loaded_config['audio']['sound_effects'])
         with open(config_file, 'r') as f:
             loaded_config = yaml.safe_load(f)
         
@@ -323,6 +331,9 @@ class TestPerformanceOptimizations(unittest.TestCase):
     
     def test_texture_atlas_creation(self):
         """Test texture atlas creation."""
+        # Initialize pygame display for texture atlas tests
+        pygame.display.set_mode((1, 1), pygame.NOFRAME)
+        
         from utils.texture_atlas import TextureAtlas
         
         atlas = TextureAtlas(512, 512)
@@ -332,17 +343,19 @@ class TestPerformanceOptimizations(unittest.TestCase):
     
     def test_texture_atlas_add(self):
         """Test adding textures to atlas."""
+        # Initialize pygame display for texture atlas tests
+        pygame.display.set_mode((1, 1), pygame.NOFRAME)
+        
         from utils.texture_atlas import TextureAtlas
         
         atlas = TextureAtlas(512, 512)
         
-        # Mock texture
-        texture_mock = Mock()
-        texture_mock.get_width.return_value = 64
-        texture_mock.get_height.return_value = 64
+        # Create a real pygame Surface for texture
+        texture_surface = pygame.Surface((64, 64))
+        texture_surface.fill((255, 0, 0))  # Red texture for testing
         
         # Add texture
-        success = atlas.add_texture('test_texture', texture_mock)
+        success = atlas.add_texture('test_texture', texture_surface)
         self.assertTrue(success)
         self.assertIn('test_texture', atlas.regions)
     
@@ -362,6 +375,8 @@ class TestPerformanceOptimizations(unittest.TestCase):
         # Mock process memory info
         mock_memory_info = Mock()
         mock_memory_info.rss = 1024 * 1024 * 100  # 100 MB
+        # Mock peak_wss as an integer, not a Mock object
+        mock_memory_info.peak_wss = 1024 * 1024 * 120  # 120 MB
         mock_process.return_value.memory_info.return_value = mock_memory_info
         
         profiler = MemoryProfiler(max_history=10)
