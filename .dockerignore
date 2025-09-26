@@ -1,0 +1,104 @@
+# Development and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Environment files
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Game-specific exclusions
+level_progress.txt
+config/voice_config.json
+SuperStudent-v1.0.zip
+SuperStudent-main/
+
+# Build artifacts
+*.spec
+build/
+dist/
+
+# Backup files
+*_backup/
+*.backup
+
+# Test files (keep only the main test runner)
+tests/
+!run_tests.py
+
+# Large media files that aren't essential for container
+music/
+
+# Development scripts
+scrape_web_emojis.py
+generate_emoji_assets.py
+config_gui.py
+update_game.py
