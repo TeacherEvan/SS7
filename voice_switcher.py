@@ -83,26 +83,31 @@ class VoiceSwitcher:
         print(f"🎵 Testing voice with: '{test_text}'")
         
         vg = UniversalVoiceGenerator()
+        
+        if not vg.is_available():
+            print("❌ ElevenLabs API not available. Check your API key.")
+            return
+            
         filename = f"voice_test_{self.config.get('current_voice', 'default')}"
         
         if vg.generate_voice_file(test_text, filename):
-            print("✅ Voice generated successfully!")
+            print("✅ Voice generated successfully with ElevenLabs!")
             
             # Play the generated voice
             try:
                 sound_file = f"sounds/{filename}.wav"
                 if os.path.exists(sound_file):
                     sound = pygame.mixer.Sound(sound_file)
-                    print("🔊 Playing sample...")
+                    print("🔊 Playing ElevenLabs sample...")
                     sound.play()
                     pygame.time.wait(6000)  # Wait for playback
                     print("✅ Playback complete!")
                 else:
                     print(f"❌ Generated file not found: {sound_file}")
             except Exception as e:
-                print(f"❌ Playback error: {e}")
+                print(f"❌ Playbook error: {e}")
         else:
-            print("❌ Voice generation failed")
+            print("❌ ElevenLabs voice generation failed")
     
     def interactive_menu(self):
         """Interactive voice switching menu."""

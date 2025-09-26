@@ -1,23 +1,23 @@
 {
     "elevenlabs_api_key": "sk_73a0b8afa66fd988f05a2d1c5e5cb6bdea08b5ec75978926",
-    "voice_id": "APpgW59845BoO9h8iuwQ",
+    "voice_id": "21m00Tcm4TlvDq8ikWAM",
     "voice_settings": {
-        "stability": 0.85,
-        "similarity_boost": 0.8,
+        "stability": 0.75,
+        "similarity_boost": 0.75,
         "style": 0.0,
         "use_speaker_boost": true,
-        "speaking_rate": 0.8
+        "speaking_rate": 0.9
     },
     "enabled": true,
     "fallback_to_beeps": true,
     "voice_volume": 0.8,
     "speaking_rate": 0.9,
-    "voice_description": "Slow, elderly, stoic male voice",
+    "voice_description": "Female voice (primary narrator)",
     "available_voices": {
         "female_default": {
             "id": "21m00Tcm4TlvDq8ikWAM",
             "name": "Rachel - British Female",
-            "description": "Clear, pleasant female voice",
+            "description": "Clear, pleasant female voice - Primary narrator",
             "settings": {
                 "stability": 0.75,
                 "similarity_boost": 0.75,
@@ -27,7 +27,7 @@
         "male_elderly_stoic": {
             "id": "APpgW59845BoO9h8iuwQ",
             "name": "Elderly Stoic Male",
-            "description": "Slow, elderly, stoic male voice",
+            "description": "Slow, elderly, stoic male voice - Special pronunciations",
             "settings": {
                 "stability": 0.85,
                 "similarity_boost": 0.8,
@@ -35,5 +35,29 @@
             }
         }
     },
-    "current_voice": "male_elderly_stoic"
+    "current_voice": "female_default",
+    "voice_assignment_rules": {
+        "default_voice": "female_default",
+        "emoji_pronunciations": {
+            "alphabet_level": "male_elderly_stoic",
+            "cl_case_level": "male_elderly_stoic"
+        },
+        "percentage_based": {
+            "colors_level": {
+                "male_elderly_stoic": 40,
+                "female_default": 60
+            },
+            "shapes_level": {
+                "male_elderly_stoic": 40,
+                "female_default": 60
+            }
+        },
+        "level_defaults": {
+            "alphabet_level": "female_default",
+            "numbers_level": "female_default",
+            "colors_level": "female_default",
+            "shapes_level": "female_default",
+            "cl_case_level": "female_default"
+        }
+    }
 }

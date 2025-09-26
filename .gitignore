@@ -353,4 +353,42 @@ secrets/
 *.secret
 api_keys.txt
 credentials.json
-auth_keys.json 
+auth_keys.json
+
+# Generated report files
+*_report.json
+*_report.md
+*_audit_report.json
+*_summary.md
+*_testing_summary.md
+*_guide.md
+*_instructions.md
+*_complete.md
+
+# Test results directory
+test-results/
+
+# Backup directories
+SuperStudent-main/
+assets/emojis_backup/
+
+# Docker generated files
+.docker/
+
+# Additional temporary files
+*.profraw
+*.gcda
+*.gcno
+*.gcov
+
+# Additional cache directories
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Additional log files
+*.log
+logs/
+log/
+debug_*.log
