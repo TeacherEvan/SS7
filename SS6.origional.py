@@ -1,22 +1,47 @@
-import pygame
-import random
 import math
-from settings import (
-    COLORS_COLLISION_DELAY, LEVEL_PROGRESS_PATH, WHITE, BLACK, FLAME_COLORS, LASER_EFFECTS,
-    LETTER_SPAWN_INTERVAL, SEQUENCES, GAME_MODES, GROUP_SIZE
-)
+import random
+
+import pygame
+
 from Display_settings import (
-    DISPLAY_MODES, DEFAULT_MODE, DISPLAY_SETTINGS_PATH,
-    FONT_SIZES, MAX_PARTICLES as PARTICLES_SETTINGS,
-    MAX_EXPLOSIONS as EXPLOSIONS_SETTINGS,
-    MAX_SWIRL_PARTICLES as SWIRL_SETTINGS,
-    MOTHER_RADIUS, detect_display_type, load_display_mode, save_display_mode,
-    PERFORMANCE_SETTINGS
+    DEFAULT_MODE,
+    DISPLAY_MODES,
+    DISPLAY_SETTINGS_PATH,
+    FONT_SIZES,
 )
-from universal_class import GlassShatterManager, HUDManager, CheckpointManager, FlamethrowerManager, CenterPieceManager, SoundManager
-from welcome_screen import welcome_screen, level_menu, draw_neon_button
-from levels import ColorsLevel, ShapesLevel, AlphabetLevel, NumbersLevel, CLCaseLevel
+from Display_settings import MAX_EXPLOSIONS as EXPLOSIONS_SETTINGS
+from Display_settings import MAX_PARTICLES as PARTICLES_SETTINGS
+from Display_settings import MAX_SWIRL_PARTICLES as SWIRL_SETTINGS
+from Display_settings import (
+    MOTHER_RADIUS,
+    PERFORMANCE_SETTINGS,
+    detect_display_type,
+    load_display_mode,
+    save_display_mode,
+)
+from levels import AlphabetLevel, CLCaseLevel, ColorsLevel, NumbersLevel, ShapesLevel
+from settings import (
+    BLACK,
+    COLORS_COLLISION_DELAY,
+    FLAME_COLORS,
+    GAME_MODES,
+    GROUP_SIZE,
+    LASER_EFFECTS,
+    LETTER_SPAWN_INTERVAL,
+    LEVEL_PROGRESS_PATH,
+    SEQUENCES,
+    WHITE,
+)
+from universal_class import (
+    CenterPieceManager,
+    CheckpointManager,
+    FlamethrowerManager,
+    GlassShatterManager,
+    HUDManager,
+    SoundManager,
+)
 from utils.event_tracker import get_event_manager
+from welcome_screen import draw_neon_button, level_menu, welcome_screen
 
 # Initialize sound mixer before pygame.init() to avoid conflicts
 pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
@@ -24,15 +49,17 @@ pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
 pygame.init()
 
 # Allow only the necessary events (including multi-touch)
-pygame.event.set_allowed([
-    pygame.FINGERDOWN,
-    pygame.FINGERUP,
-    pygame.FINGERMOTION,
-    pygame.QUIT,
-    pygame.KEYDOWN,
-    pygame.MOUSEBUTTONDOWN,
-    pygame.MOUSEBUTTONUP,
-])
+pygame.event.set_allowed(
+    [
+        pygame.FINGERDOWN,
+        pygame.FINGERUP,
+        pygame.FINGERMOTION,
+        pygame.QUIT,
+        pygame.KEYDOWN,
+        pygame.MOUSEBUTTONDOWN,
+        pygame.MOUSEBUTTONUP,
+    ]
+)
 
 # Get the screen size and initialize display in fullscreen
 info = pygame.display.Info()
@@ -46,10 +73,11 @@ DISPLAY_MODE = DEFAULT_MODE
 # Load display mode from settings or auto-detect
 DISPLAY_MODE = load_display_mode()
 
+from universal_class import MultiTouchManager
+from utils.particle_system import ParticleManager
+
 # Import ResourceManager
 from utils.resource_manager import ResourceManager
-from utils.particle_system import ParticleManager
-from universal_class import MultiTouchManager
 
 # Initialize global event tracking system early
 event_manager = get_event_manager()
@@ -65,6 +93,7 @@ center_piece_manager = None
 sound_manager = None
 event_manager = None
 
+
 def init_resources():
     """
     Initialize game resources based on the current display mode using ResourceManager.
@@ -72,66 +101,69 @@ def init_resources():
     global font_sizes, fonts, large_font, small_font, TARGET_FONT, TITLE_FONT
     global MAX_PARTICLES, MAX_EXPLOSIONS, MAX_SWIRL_PARTICLES, mother_radius
     global particle_manager, glass_shatter_manager, multi_touch_manager, hud_manager, checkpoint_manager, flamethrower_manager, center_piece_manager, sound_manager
-    
+
     # Get resource manager singleton
     resource_manager = ResourceManager()
-    
+
     # Set display mode in the resource manager
     resource_manager.set_display_mode(DISPLAY_MODE)
-    
+
     # Initialize mode-specific settings from Display_settings.py
     MAX_PARTICLES = PARTICLES_SETTINGS[DISPLAY_MODE]
     MAX_EXPLOSIONS = EXPLOSIONS_SETTINGS[DISPLAY_MODE]
     MAX_SWIRL_PARTICLES = SWIRL_SETTINGS[DISPLAY_MODE]
     mother_radius = MOTHER_RADIUS[DISPLAY_MODE]
-    
+
     # Initialize font sizes from Display_settings
     font_sizes = FONT_SIZES[DISPLAY_MODE]["regular"]
-    
+
     # Get core resources
     resources = resource_manager.initialize_game_resources()
-    
+
     # Assign resources to global variables for backward compatibility
-    fonts = resources['fonts']
-    large_font = resources['large_font']
-    small_font = resources['small_font']
-    TARGET_FONT = resources['target_font']
-    TITLE_FONT = resources['title_font']
-    
+    fonts = resources["fonts"]
+    large_font = resources["large_font"]
+    small_font = resources["small_font"]
+    TARGET_FONT = resources["target_font"]
+    TITLE_FONT = resources["title_font"]
+
     # Initialize particle manager with display mode specific settings
     particle_manager = ParticleManager(max_particles=MAX_PARTICLES)
     particle_manager.set_culling_distance(WIDTH)  # Set culling distance based on screen size
-    
+
     # Initialize glass shatter manager
     glass_shatter_manager = GlassShatterManager(WIDTH, HEIGHT, particle_manager)
-    
+
     # Initialize multi-touch manager
     multi_touch_manager = MultiTouchManager(WIDTH, HEIGHT)
-    
+
     # Initialize HUD manager
     hud_manager = HUDManager(WIDTH, HEIGHT, small_font, glass_shatter_manager)
-    
+
     # Initialize checkpoint manager
     checkpoint_manager = CheckpointManager(WIDTH, HEIGHT, fonts, small_font)
-    
+
     # Initialize flamethrower manager
     flamethrower_manager = FlamethrowerManager()
-    
+
     # Initialize sound manager
     global sound_manager
     sound_manager = SoundManager()
     # Connect event tracker to sound manager (will be set after init_resources)
     # sound_manager.set_event_tracker(event_manager.get_tracker("sound"))
-    
+
     # Initialize center piece manager
-    center_piece_manager = CenterPieceManager(WIDTH, HEIGHT, DISPLAY_MODE, particle_manager, MAX_SWIRL_PARTICLES, resource_manager)
-    
+    center_piece_manager = CenterPieceManager(
+        WIDTH, HEIGHT, DISPLAY_MODE, particle_manager, MAX_SWIRL_PARTICLES, resource_manager
+    )
+
     # Save display mode preference
     save_display_mode(DISPLAY_MODE)
-    
+
     print(f"Resources initialized for display mode: {DISPLAY_MODE}")
-    
+
     return resource_manager
+
 
 # Initialize resources with current mode
 resource_manager = init_resources()
@@ -139,25 +171,37 @@ resource_manager = init_resources()
 # Connect event tracker to sound manager now that both are initialized (if event manager is available)
 if event_manager:
     sound_manager.set_event_tracker(event_manager.get_tracker("sound"))
-    
+
     # Track successful initialization
-    event_manager.track_event("system", "initialization", {
-        "component": "SS6_Game",
-        "success": True,
-        "display_mode": DISPLAY_MODE,
-        "screen_size": f"{WIDTH}x{HEIGHT}"
-    })
+    event_manager.track_event(
+        "system",
+        "initialization",
+        {
+            "component": "SS6_Game",
+            "success": True,
+            "display_mode": DISPLAY_MODE,
+            "screen_size": f"{WIDTH}x{HEIGHT}",
+        },
+    )
 
 # OPTIMIZATION: Global particle system limits to prevent lag
 PARTICLE_CULLING_DISTANCE = WIDTH  # Distance at which to cull offscreen particles
 # Particle pool for object reuse
 particle_pool = []
 for _ in range(100):  # Pre-create some particles to reuse
-    particle_pool.append({
-        "x": 0, "y": 0, "color": (0,0,0), "size": 0, 
-        "dx": 0, "dy": 0, "duration": 0, "start_duration": 0,
-        "active": False
-    })
+    particle_pool.append(
+        {
+            "x": 0,
+            "y": 0,
+            "color": (0, 0, 0),
+            "size": 0,
+            "dx": 0,
+            "dy": 0,
+            "duration": 0,
+            "start_duration": 0,
+            "active": False,
+        }
+    )
 
 # Global variables for effects and touches.
 particles = []
@@ -190,21 +234,19 @@ convergence_timer = 0
 ###############################################################################
 
 
-
-
-
 ###############################################################################
 #                          GAME LOGIC & EFFECTS                               #
 ###############################################################################
 
+
 def game_loop(mode):
     global shake_duration, shake_magnitude, particles, explosions, lasers, charging_ability, charge_timer, charge_particles, ability_target, convergence_target, convergence_timer, mother_radius, color_idx, color_sequence, next_color_index, target_dots_left, glass_shatter_manager, multi_touch_manager, flamethrower_manager, center_piece_manager
-    
+
     # Event tracking for the level start (if event manager is available)
     if event_manager:
         event_manager.get_tracker("level").track_level_start(mode)
         event_manager.get_tracker("gameplay").reset_session_stats()
-    
+
     # Reset global effects that could persist between levels
     shake_duration = 0
     shake_magnitude = 0
@@ -215,7 +257,7 @@ def game_loop(mode):
     glass_shatter_manager.reset()  # Reset glass shatter state
     flamethrower_manager.clear()  # Clear any lingering flamethrower effects
     center_piece_manager.reset()  # Reset center piece state
-    mother_radius = 90 # Default radius for mother dot in Colors level
+    mother_radius = 90  # Default radius for mother dot in Colors level
     color_sequence = []
     color_idx = 0
     next_color_index = 0
@@ -226,10 +268,10 @@ def game_loop(mode):
     charging_ability = False
     charge_particles = []
     ability_target = None
-    
+
     # Initialize player trail particles
     particles = []
-    
+
     # Try to read from a persistent settings file to check if shapes was completed
     try:
         with open(LEVEL_PROGRESS_PATH, "r") as f:
@@ -239,30 +281,28 @@ def game_loop(mode):
     except:
         # If file doesn't exist or can't be read, assume shapes not completed
         shapes_completed = False
-        
-
 
     # Create sequence based on selected mode
     sequence = SEQUENCES.get(mode, SEQUENCES["alphabet"])  # Default to alphabet if mode not found
-    
+
     # Split into groups of GROUP_SIZE
-    groups = [sequence[i:i+GROUP_SIZE] for i in range(0, len(sequence), GROUP_SIZE)]
+    groups = [sequence[i : i + GROUP_SIZE] for i in range(0, len(sequence), GROUP_SIZE)]
 
     # Initialize game variables
     current_group_index = 0
-    if not groups and mode != "colors": # Handle case where sequence is empty or too short
+    if not groups and mode != "colors":  # Handle case where sequence is empty or too short
         print("Error: No groups generated for the selected mode.")
-        return False # Or handle appropriately
+        return False  # Or handle appropriately
 
     current_group = groups[current_group_index] if mode != "colors" else []
     # For consistency, use target_letter to represent the target even in shapes mode.
     letters_to_target = current_group.copy()
     if not letters_to_target and mode != "colors":
         print("Error: Current group is empty.")
-        return False # Or handle appropriately
+        return False  # Or handle appropriately
     target_letter = letters_to_target[0] if mode != "colors" else None
     TOTAL_LETTERS = len(sequence)
-    total_destroyed = 0 # Tracks overall destroyed across all groups
+    total_destroyed = 0  # Tracks overall destroyed across all groups
     overall_destroyed = 0
     running = True
 
@@ -277,13 +317,15 @@ def game_loop(mode):
         stars.append([x, y, radius])
 
     # Initialize per-round (group) variables outside the main loop
-    letters = []           # items (letters or numbers) on screen
-    letters_spawned = 0    # count spawned items in current group
+    letters = []  # items (letters or numbers) on screen
+    letters_spawned = 0  # count spawned items in current group
     letters_destroyed = 0  # count destroyed in current group
     last_checkpoint_triggered = 0  # New variable to track checkpoints
     checkpoint_waiting = False  # Flag to track if we're waiting to show a checkpoint screen
     checkpoint_delay_frames = 0  # Counter for checkpoint animation delay
-    just_completed_level = False  # Flag to prevent checkpoint triggering right after level completion
+    just_completed_level = (
+        False  # Flag to prevent checkpoint triggering right after level completion
+    )
     score = 0
     abilities = ["laser", "aoe", "charge_up"]
     current_ability = "laser"
@@ -307,36 +349,81 @@ def game_loop(mode):
     if mode == "colors":
         # Create and run the colors level
         colors_level = ColorsLevel(
-            WIDTH, HEIGHT, screen, small_font, particle_manager,
-            glass_shatter_manager, multi_touch_manager, hud_manager,
-            mother_radius, create_explosion, checkpoint_manager.show_checkpoint_screen, game_over_screen,
-            explosions, draw_explosion, sound_manager
+            WIDTH,
+            HEIGHT,
+            screen,
+            small_font,
+            particle_manager,
+            glass_shatter_manager,
+            multi_touch_manager,
+            hud_manager,
+            mother_radius,
+            create_explosion,
+            checkpoint_manager.show_checkpoint_screen,
+            game_over_screen,
+            explosions,
+            draw_explosion,
+            sound_manager,
         )
         return colors_level.run()
-    
+
     # --- SHAPES LEVEL SPECIAL LOGIC ---
     if mode == "shapes":
         # Create and run the shapes level
         shapes_level = ShapesLevel(
-            WIDTH, HEIGHT, screen, fonts, small_font, TARGET_FONT,
-            particle_manager, glass_shatter_manager, multi_touch_manager,
-            hud_manager, checkpoint_manager, center_piece_manager,
-            flamethrower_manager, resource_manager, create_explosion, create_flame_effect,
-            apply_explosion_effect, create_particle,
-            explosions, lasers, draw_explosion, game_over_screen, sound_manager
+            WIDTH,
+            HEIGHT,
+            screen,
+            fonts,
+            small_font,
+            TARGET_FONT,
+            particle_manager,
+            glass_shatter_manager,
+            multi_touch_manager,
+            hud_manager,
+            checkpoint_manager,
+            center_piece_manager,
+            flamethrower_manager,
+            resource_manager,
+            create_explosion,
+            create_flame_effect,
+            apply_explosion_effect,
+            create_particle,
+            explosions,
+            lasers,
+            draw_explosion,
+            game_over_screen,
+            sound_manager,
         )
         return shapes_level.run()
-    
+
     # --- ALPHABET LEVEL SPECIAL LOGIC ---
     if mode == "alphabet":
         # Create and run the alphabet level
         alphabet_level = AlphabetLevel(
-            WIDTH, HEIGHT, screen, fonts, small_font, TARGET_FONT,
-            particle_manager, glass_shatter_manager, multi_touch_manager,
-            hud_manager, checkpoint_manager, center_piece_manager, 
-            flamethrower_manager, resource_manager, create_explosion, create_flame_effect,
-            apply_explosion_effect, create_particle,
-            explosions, lasers, draw_explosion, game_over_screen, sound_manager
+            WIDTH,
+            HEIGHT,
+            screen,
+            fonts,
+            small_font,
+            TARGET_FONT,
+            particle_manager,
+            glass_shatter_manager,
+            multi_touch_manager,
+            hud_manager,
+            checkpoint_manager,
+            center_piece_manager,
+            flamethrower_manager,
+            resource_manager,
+            create_explosion,
+            create_flame_effect,
+            apply_explosion_effect,
+            create_particle,
+            explosions,
+            lasers,
+            draw_explosion,
+            game_over_screen,
+            sound_manager,
         )
         return alphabet_level.run()
 
@@ -344,12 +431,29 @@ def game_loop(mode):
     if mode == "numbers":
         # Create and run the numbers level
         numbers_level = NumbersLevel(
-            WIDTH, HEIGHT, screen, fonts, small_font, TARGET_FONT,
-            particle_manager, glass_shatter_manager, multi_touch_manager,
-            hud_manager, checkpoint_manager, center_piece_manager, 
-            flamethrower_manager, resource_manager, create_explosion, create_flame_effect,
-            apply_explosion_effect, create_particle,
-            explosions, lasers, draw_explosion, game_over_screen, sound_manager
+            WIDTH,
+            HEIGHT,
+            screen,
+            fonts,
+            small_font,
+            TARGET_FONT,
+            particle_manager,
+            glass_shatter_manager,
+            multi_touch_manager,
+            hud_manager,
+            checkpoint_manager,
+            center_piece_manager,
+            flamethrower_manager,
+            resource_manager,
+            create_explosion,
+            create_flame_effect,
+            apply_explosion_effect,
+            create_particle,
+            explosions,
+            lasers,
+            draw_explosion,
+            game_over_screen,
+            sound_manager,
         )
         return numbers_level.run()
 
@@ -357,19 +461,38 @@ def game_loop(mode):
     if mode == "clcase":
         # Create and run the C/L case level
         clcase_level = CLCaseLevel(
-            WIDTH, HEIGHT, screen, fonts, small_font, TARGET_FONT,
-            particle_manager, glass_shatter_manager, multi_touch_manager,
-            hud_manager, checkpoint_manager, center_piece_manager, 
-            flamethrower_manager, resource_manager, create_explosion, create_flame_effect,
-            apply_explosion_effect, create_particle,
-            explosions, lasers, draw_explosion, game_over_screen, sound_manager
+            WIDTH,
+            HEIGHT,
+            screen,
+            fonts,
+            small_font,
+            TARGET_FONT,
+            particle_manager,
+            glass_shatter_manager,
+            multi_touch_manager,
+            hud_manager,
+            checkpoint_manager,
+            center_piece_manager,
+            flamethrower_manager,
+            resource_manager,
+            create_explosion,
+            create_flame_effect,
+            apply_explosion_effect,
+            create_particle,
+            explosions,
+            lasers,
+            draw_explosion,
+            game_over_screen,
+            sound_manager,
         )
         return clcase_level.run()
 
     # --- ERROR HANDLER ---
     # All game modes should be handled by dedicated level classes above.
     # If we reach this point, there's an unrecognized mode.
-    print(f"Error: Unrecognized game mode '{mode}'. All modes should be handled by dedicated level classes.")
+    print(
+        f"Error: Unrecognized game mode '{mode}'. All modes should be handled by dedicated level classes."
+    )
     return False  # Return to menu
 
 
@@ -377,23 +500,22 @@ def create_aoe(x, y, letters, target_letter):
     """Handles Area of Effect ability (placeholder/unused currently)."""
     # This function seems unused based on the event loop logic.
     # If intended, it would need integration into the event handling.
-    global letters_destroyed # Needs access to modify this counter
-    create_explosion(x, y, max_radius=350, duration=40) # Bigger AOE explosion
+    global letters_destroyed  # Needs access to modify this counter
+    create_explosion(x, y, max_radius=350, duration=40)  # Bigger AOE explosion
     destroyed_count_in_aoe = 0
     for letter_obj in letters[:]:
         distance = math.hypot(letter_obj["x"] - x, letter_obj["y"] - y)
-        if distance < 200: # AOE radius
-             # Optional: Check if it's the target letter or destroy any letter?
-             # if letter_obj["value"] == target_letter:
-                create_explosion(letter_obj["x"], letter_obj["y"], duration=20) # Smaller explosions for hit targets
-                # Add particles, etc.
-                letters.remove(letter_obj)
-                destroyed_count_in_aoe += 1
+        if distance < 200:  # AOE radius
+            # Optional: Check if it's the target letter or destroy any letter?
+            # if letter_obj["value"] == target_letter:
+            create_explosion(
+                letter_obj["x"], letter_obj["y"], duration=20
+            )  # Smaller explosions for hit targets
+            # Add particles, etc.
+            letters.remove(letter_obj)
+            destroyed_count_in_aoe += 1
 
-    letters_destroyed += destroyed_count_in_aoe # Update the counter for the current group
-
-
-
+    letters_destroyed += destroyed_count_in_aoe  # Update the counter for the current group
 
 
 def well_done_screen(score):
@@ -417,7 +539,7 @@ def well_done_screen(score):
                 return True  # Return True to indicate we should go back to level menu
 
         # Display "Well Done!" message
-        well_done_font = fonts[2] # Use one of the preloaded larger fonts
+        well_done_font = fonts[2]  # Use one of the preloaded larger fonts
         well_done_text = well_done_font.render("Well Done!", True, WHITE)
         well_done_rect = well_done_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 50))
         screen.blit(well_done_text, well_done_rect)
@@ -427,7 +549,6 @@ def well_done_screen(score):
         score_rect = score_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 10))
         screen.blit(score_text, score_rect)
 
-
         # Flashing "Click for Next Mission" text
         next_player_color = random.choice(FLAME_COLORS) if flash else BLACK
         next_player_text = small_font.render("Click for Next Mission", True, next_player_color)
@@ -436,21 +557,22 @@ def well_done_screen(score):
 
         pygame.display.flip()
         flash_count += 1
-        if flash_count % 30 == 0: # Flash every half second
+        if flash_count % 30 == 0:  # Flash every half second
             flash = not flash
         clock.tick(60)
-    return False # Should not be reached if click is required
+    return False  # Should not be reached if click is required
+
 
 def apply_explosion_effect(x, y, explosion_radius, letters):
     """Pushes nearby letters away from an explosion center."""
     for letter in letters:
         dx = letter["x"] - x
         dy = letter["y"] - y
-        dist_sq = dx*dx + dy*dy
+        dist_sq = dx * dx + dy * dy
         if dist_sq < explosion_radius * explosion_radius and dist_sq > 0:
             dist = math.sqrt(dist_sq)
             # Force is stronger closer to the center
-            force = (1 - (dist / explosion_radius)) * 15 # Adjust force multiplier as needed
+            force = (1 - (dist / explosion_radius)) * 15  # Adjust force multiplier as needed
             # Apply force directly to velocity
             letter["dx"] += (dx / dist) * force
             letter["dy"] += (dy / dist) * force
@@ -458,12 +580,10 @@ def apply_explosion_effect(x, y, explosion_radius, letters):
             letter["can_bounce"] = True
 
 
-
-
 def create_player_trail(x, y):
     """Creates trail particles behind the (currently static) player position."""
     # This might be less useful if the player doesn't move, but kept for potential future use.
-    for _ in range(1): # Reduce particle count for static player
+    for _ in range(1):  # Reduce particle count for static player
         create_particle(
             x + random.uniform(-10, 10),  # Spawn around center
             y + random.uniform(-10, 10),
@@ -471,8 +591,9 @@ def create_player_trail(x, y):
             random.randint(2, 4),
             random.uniform(-0.2, 0.2),  # Slow drift
             random.uniform(-0.2, 0.2),
-            20  # Shorter duration
+            20,  # Shorter duration
         )
+
 
 # Restore charge particle count for charge-up effect
 def start_charge_up_effect(player_x, player_y, target_x, target_y):
@@ -481,96 +602,110 @@ def start_charge_up_effect(player_x, player_y, target_x, target_y):
     charge_timer = 45
     ability_target = (target_x, target_y)
     charge_particles = []
-    
+
     # PERFORMANCE: Reduce particle count for QBoard
     particle_count = 75 if DISPLAY_MODE == "QBOARD" else 150
-    
+
     for _ in range(particle_count):
-        side = random.choice(['top', 'bottom', 'left', 'right'])
-        if side == 'top':
+        side = random.choice(["top", "bottom", "left", "right"])
+        if side == "top":
             x, y = random.uniform(0, WIDTH), random.uniform(-100, -20)
-        elif side == 'bottom':
+        elif side == "bottom":
             x, y = random.uniform(0, WIDTH), random.uniform(HEIGHT + 20, HEIGHT + 100)
-        elif side == 'left':
+        elif side == "left":
             x, y = random.uniform(-100, -20), random.uniform(0, HEIGHT)
-        else: # right
+        else:  # right
             x, y = random.uniform(WIDTH + 20, WIDTH + 100), random.uniform(0, HEIGHT)
 
-        charge_particles.append({
-            "type": "materializing",
-            "x": x, "y": y,
-            "target_x": player_x, # Target is the player center (orb)
-            "target_y": player_y - 80, # Target orb position
-            "color": random.choice(FLAME_COLORS),
-            "size": random.uniform(1, 3), "max_size": random.uniform(4, 8), # Slightly larger max
-            "speed": random.uniform(1.0, 3.0), # Start with some speed
-            "opacity": 0, "max_opacity": random.randint(180, 255),
-            "materialize_time": random.randint(10, 25), # Faster materialization
-            "delay": random.randint(0, 15), # Shorter stagger
-            "acceleration": random.uniform(0.1, 0.4), # Higher acceleration
-            "wobble_angle": random.uniform(0, 2 * math.pi),
-            "wobble_speed": random.uniform(0.1, 0.3),
-            "wobble_amount": random.uniform(1.0, 3.0), # Slightly more wobble
-            "trail": random.random() < 0.5 # More trails
-        })
+        charge_particles.append(
+            {
+                "type": "materializing",
+                "x": x,
+                "y": y,
+                "target_x": player_x,  # Target is the player center (orb)
+                "target_y": player_y - 80,  # Target orb position
+                "color": random.choice(FLAME_COLORS),
+                "size": random.uniform(1, 3),
+                "max_size": random.uniform(4, 8),  # Slightly larger max
+                "speed": random.uniform(1.0, 3.0),  # Start with some speed
+                "opacity": 0,
+                "max_opacity": random.randint(180, 255),
+                "materialize_time": random.randint(10, 25),  # Faster materialization
+                "delay": random.randint(0, 15),  # Shorter stagger
+                "acceleration": random.uniform(0.1, 0.4),  # Higher acceleration
+                "wobble_angle": random.uniform(0, 2 * math.pi),
+                "wobble_speed": random.uniform(0.1, 0.3),
+                "wobble_amount": random.uniform(1.0, 3.0),  # Slightly more wobble
+                "trail": random.random() < 0.5,  # More trails
+            }
+        )
+
 
 # Legacy functions - now handled by CenterPieceManager
 def get_particle_from_pool():
     """Legacy function that now uses the particle manager."""
     return particle_manager.get_particle()
 
+
 def release_particle(particle):
     """Legacy function that now uses the particle manager."""
     particle_manager.release_particle(particle)
+
 
 def create_particle(x, y, color, size, dx, dy, duration):
     """Legacy function that now uses the particle manager."""
     return particle_manager.create_particle(x, y, color, size, dx, dy, duration)
 
+
 def create_explosion(x, y, color=None, max_radius=270, duration=30):
     """Adds an explosion effect to the list, with a limit for performance."""
     global shake_duration, explosions, sound_manager
-    
+
     # Play explosion sound effect
     if sound_manager:
         sound_manager.play_sound("explosion")
-        
+
     # Track explosion event (if event manager is available)
     if event_manager:
-        event_manager.track_event("gameplay", "explosion_created", {
-            "x": x, "y": y, "max_radius": max_radius, "duration": duration
-        })
-    
+        event_manager.track_event(
+            "gameplay",
+            "explosion_created",
+            {"x": x, "y": y, "max_radius": max_radius, "duration": duration},
+        )
+
     # Limit number of explosions for performance
     if len(explosions) >= MAX_EXPLOSIONS:
         # If we've reached the limit, replace the oldest explosion
         oldest_explosion = min(explosions, key=lambda exp: exp["duration"])
         explosions.remove(oldest_explosion)
-    
+
     if color is None:
         color = random.choice(FLAME_COLORS)
-        
-    explosions.append({
-        "x": x,
-        "y": y,
-        "radius": 10, # Start small
-        "color": color,
-        "max_radius": max_radius,
-        "duration": duration,
-        "start_duration": duration # Store initial duration for fading
-    })
-    
-    shake_duration = max(shake_duration, 10) # Trigger screen shake, don't override longer shakes
 
+    explosions.append(
+        {
+            "x": x,
+            "y": y,
+            "radius": 10,  # Start small
+            "color": color,
+            "max_radius": max_radius,
+            "duration": duration,
+            "start_duration": duration,  # Store initial duration for fading
+        }
+    )
+
+    shake_duration = max(shake_duration, 10)  # Trigger screen shake, don't override longer shakes
 
 
 def draw_explosion(explosion, offset_x=0, offset_y=0):
     """Draws a single explosion frame, expanding and fading."""
     # Expand radius towards max_radius
-    explosion["radius"] += (explosion["max_radius"] - explosion["radius"]) * 0.1 # Smoother expansion
+    explosion["radius"] += (
+        explosion["max_radius"] - explosion["radius"]
+    ) * 0.1  # Smoother expansion
     # Calculate alpha based on remaining duration
     alpha = max(0, int(255 * (explosion["duration"] / explosion["start_duration"])))
-    color = (*explosion["color"][:3], alpha) # Add alpha to color
+    color = (*explosion["color"][:3], alpha)  # Add alpha to color
     radius = int(explosion["radius"])
     # Apply shake offset
     draw_x = int(explosion["x"] + offset_x)
@@ -578,22 +713,22 @@ def draw_explosion(explosion, offset_x=0, offset_y=0):
 
     # Draw using SRCALPHA surface for transparency
     if radius > 0:
-        explosion_surf = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+        explosion_surf = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(explosion_surf, color, (radius, radius), radius)
         screen.blit(explosion_surf, (draw_x - radius, draw_y - radius))
+
 
 def create_flame_effect(start_x, start_y, end_x, end_y):
     """Creates a laser/flame visual effect between two points."""
     global flamethrower_manager, sound_manager
-    
+
     # Play laser sound effect before creating visual effect
     if sound_manager:
         sound_manager.play_sound("laser")
-    
+
     # Use flamethrower manager for all levels except colors
     if flamethrower_manager:
         flamethrower_manager.create_flamethrower(start_x, start_y, end_x, end_y, duration=10)
-
 
 
 def game_over_screen():
@@ -603,20 +738,21 @@ def game_over_screen():
     print("Game over screen is not implemented yet.")
     return False  # Placeholder return, actual implementation needed
 
+
 if __name__ == "__main__":
     DISPLAY_MODE = welcome_screen(WIDTH, HEIGHT, screen, small_font, init_resources)
     while True:
         mode = level_menu(WIDTH, HEIGHT, screen, small_font)
         if mode is None:
             break
-        
+
         # Run the game loop and check its return value
         result = game_loop(mode)
-        
+
         # If result is "menu", user pressed ESC - return to level menu
         if result == "menu":
             continue
-        
+
         # If game_loop returns True, restart the level for shapes level or colors level
         restart_level = result
         while restart_level and (mode == "shapes" or mode == "colors"):

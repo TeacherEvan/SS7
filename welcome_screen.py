@@ -1,32 +1,50 @@
-import pygame
-import random
 import math
-from settings import WHITE, BLACK, FLAME_COLORS
+import random
+
+import pygame
+
 from Display_settings import (
-    DISPLAY_MODES, DEFAULT_MODE, DISPLAY_SETTINGS_PATH,
-    DEBUG_MODE, SHOW_FPS, detect_display_type, load_display_mode, 
-    save_display_mode, draw_neon_button
+    DEBUG_MODE,
+    DEFAULT_MODE,
+    DISPLAY_MODES,
+    DISPLAY_SETTINGS_PATH,
+    SHOW_FPS,
+    detect_display_type,
+    draw_neon_button,
+    load_display_mode,
+    save_display_mode,
 )
+from settings import BLACK, FLAME_COLORS, WHITE
+
 
 def level_menu(WIDTH, HEIGHT, screen, small_font):
     """Display the Level Options screen to choose the mission using a cyberpunk neon display."""
     running = True
     clock = pygame.time.Clock()
-    
+
     # Load display mode to adjust particle count
     display_mode = load_display_mode()
-    
+
     # Adjust particle count based on display mode for performance
     particle_count = 200 if display_mode == "QBOARD" else 400  # Reduced from 700
-    
+
     # Button dimensions and positions (arranged in two rows)
     button_width = 300
     button_height = 80
-    abc_rect = pygame.Rect((WIDTH // 2 - button_width - 20, HEIGHT // 2 - button_height - 10), (button_width, button_height))
-    num_rect = pygame.Rect((WIDTH // 2 + 20, HEIGHT // 2 - button_height - 10), (button_width, button_height))
-    shapes_rect = pygame.Rect((WIDTH // 2 - button_width - 20, HEIGHT // 2 + 10), (button_width, button_height))
+    abc_rect = pygame.Rect(
+        (WIDTH // 2 - button_width - 20, HEIGHT // 2 - button_height - 10),
+        (button_width, button_height),
+    )
+    num_rect = pygame.Rect(
+        (WIDTH // 2 + 20, HEIGHT // 2 - button_height - 10), (button_width, button_height)
+    )
+    shapes_rect = pygame.Rect(
+        (WIDTH // 2 - button_width - 20, HEIGHT // 2 + 10), (button_width, button_height)
+    )
     clcase_rect = pygame.Rect((WIDTH // 2 + 20, HEIGHT // 2 + 10), (button_width, button_height))
-    colors_rect = pygame.Rect((WIDTH // 2 - 150, HEIGHT // 2 + 120), (300, 80))  # Add a new Colors button
+    colors_rect = pygame.Rect(
+        (WIDTH // 2 - 150, HEIGHT // 2 + 120), (300, 80)
+    )  # Add a new Colors button
 
     # Set up smooth color transition variables for the title
     color_transition = 0.0
@@ -35,11 +53,11 @@ def level_menu(WIDTH, HEIGHT, screen, small_font):
 
     # Vivid bright colors for particles - similar to welcome screen
     particle_colors = [
-        (255, 0, 128),   # Bright pink
-        (0, 255, 128),   # Bright green
-        (128, 0, 255),   # Bright purple
-        (255, 128, 0),   # Bright orange
-        (0, 128, 255)    # Bright blue
+        (255, 0, 128),  # Bright pink
+        (0, 255, 128),  # Bright green
+        (128, 0, 255),  # Bright purple
+        (255, 128, 0),  # Bright orange
+        (0, 128, 255),  # Bright blue
     ]
 
     # Create OUTWARD moving particles (optimized count)
@@ -50,14 +68,16 @@ def level_menu(WIDTH, HEIGHT, screen, small_font):
         distance = random.uniform(10, 100)  # Close to center
         x = WIDTH // 2 + math.cos(angle) * distance
         y = HEIGHT // 2 + math.sin(angle) * distance
-        repel_particles.append({
-            "x": x,
-            "y": y,
-            "color": random.choice(particle_colors),
-            "size": random.randint(5, 7),
-            "speed": random.uniform(3.0, 6.0),
-            "angle": angle  # Store the angle for outward movement
-        })
+        repel_particles.append(
+            {
+                "x": x,
+                "y": y,
+                "color": random.choice(particle_colors),
+                "size": random.randint(5, 7),
+                "speed": random.uniform(3.0, 6.0),
+                "angle": angle,  # Store the angle for outward movement
+            }
+        )
 
     # Pre-render static text surfaces for better performance
     title_surface = small_font.render("Choose Mission:", True, WHITE)
@@ -74,7 +94,8 @@ def level_menu(WIDTH, HEIGHT, screen, small_font):
         screen.fill(BLACK)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit(); exit()
+                pygame.quit()
+                exit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 return None  # Exit to main menu
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -97,8 +118,12 @@ def level_menu(WIDTH, HEIGHT, screen, small_font):
             particle["y"] += math.sin(particle["angle"]) * particle["speed"]
 
             # Reset particles that move off screen
-            if (particle["x"] < 0 or particle["x"] > WIDTH or
-                particle["y"] < 0 or particle["y"] > HEIGHT):
+            if (
+                particle["x"] < 0
+                or particle["x"] > WIDTH
+                or particle["y"] < 0
+                or particle["y"] > HEIGHT
+            ):
                 # New angle for variety
                 angle = random.uniform(0, math.pi * 2)
                 distance = random.uniform(5, 50)  # Start close to center , was 50
@@ -110,9 +135,12 @@ def level_menu(WIDTH, HEIGHT, screen, small_font):
                 particle["speed"] = random.uniform(1.0, 3.0)
 
             # Draw the particle
-            pygame.draw.circle(screen, particle["color"],
-                              (int(particle["x"]), int(particle["y"])),
-                              particle["size"])
+            pygame.draw.circle(
+                screen,
+                particle["color"],
+                (int(particle["x"]), int(particle["y"])),
+                particle["size"],
+            )
 
         # Update title color transition
         color_transition += 0.01
@@ -126,7 +154,9 @@ def level_menu(WIDTH, HEIGHT, screen, small_font):
         title_color = (r, g, b)
 
         # Draw title (re-render only when color changes significantly)
-        if color_transition < 0.02 or color_transition > 0.98:  # Only re-render at color transitions
+        if (
+            color_transition < 0.02 or color_transition > 0.98
+        ):  # Only re-render at color transitions
             title_surface = small_font.render("Choose Mission:", True, title_color)
         title_rect = title_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 150))
         screen.blit(title_surface, title_rect)
@@ -161,26 +191,27 @@ def level_menu(WIDTH, HEIGHT, screen, small_font):
         target_fps = 45 if display_mode == "QBOARD" else 60
         clock.tick(target_fps)
 
+
 def welcome_screen(WIDTH, HEIGHT, screen, small_font, init_resources_callback):
     """Show the original animated welcome screen with particles and title."""
     # Load display mode from settings or auto-detect
     DISPLAY_MODE = load_display_mode()
-    
+
     running = True
     clock = pygame.time.Clock()
-    
+
     # Particle colors - vivid and bright
     particle_colors = [
-        (255, 0, 128),   # Bright pink
-        (0, 255, 128),   # Bright green
-        (128, 0, 255),   # Bright purple
-        (255, 128, 0),   # Bright orange
-        (0, 128, 255)    # Bright blue
+        (255, 0, 128),  # Bright pink
+        (0, 255, 128),  # Bright green
+        (128, 0, 255),  # Bright purple
+        (255, 128, 0),  # Bright orange
+        (0, 128, 255),  # Bright blue
     ]
-    
+
     # Adjust particle count based on display mode
     particle_count = 150 if DISPLAY_MODE == "QBOARD" else 300
-    
+
     # Create particles with gravitational effect toward center
     particles = []
     for _ in range(particle_count):
@@ -188,23 +219,25 @@ def welcome_screen(WIDTH, HEIGHT, screen, small_font, init_resources_callback):
         distance = random.uniform(200, max(WIDTH, HEIGHT))
         x = WIDTH // 2 + math.cos(angle) * distance
         y = HEIGHT // 2 + math.sin(angle) * distance
-        particles.append({
-            "x": x,
-            "y": y,
-            "vx": random.uniform(-2, 2),
-            "vy": random.uniform(-2, 2),
-            "color": random.choice(particle_colors),
-            "size": random.randint(8, 15),
-            "lifetime": random.randint(60, 180)
-        })
-    
+        particles.append(
+            {
+                "x": x,
+                "y": y,
+                "vx": random.uniform(-2, 2),
+                "vy": random.uniform(-2, 2),
+                "color": random.choice(particle_colors),
+                "size": random.randint(8, 15),
+                "lifetime": random.randint(60, 180),
+            }
+        )
+
     # Title animation variables
     title_pulse = 0
     color_transition = 0.0
-    
+
     while running:
         dt = clock.tick(60)
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -213,10 +246,10 @@ def welcome_screen(WIDTH, HEIGHT, screen, small_font, init_resources_callback):
                 running = False
             elif event.type == pygame.FINGERDOWN:
                 running = False
-        
+
         # Clear screen
         screen.fill(BLACK)
-        
+
         # Update and draw particles with gravitational pull toward center
         center_x, center_y = WIDTH // 2, HEIGHT // 2
         for particle in particles[:]:
@@ -224,24 +257,24 @@ def welcome_screen(WIDTH, HEIGHT, screen, small_font, init_resources_callback):
             dx = center_x - particle["x"]
             dy = center_y - particle["y"]
             distance = math.sqrt(dx * dx + dy * dy)
-            
+
             if distance > 0:
                 # Normalize and apply gentle pull
                 force = 0.5
                 particle["vx"] += (dx / distance) * force
                 particle["vy"] += (dy / distance) * force
-            
+
             # Apply some damping to prevent excessive speed
             particle["vx"] *= 0.98
             particle["vy"] *= 0.98
-            
+
             # Update position
             particle["x"] += particle["vx"]
             particle["y"] += particle["vy"]
-            
+
             # Update lifetime
             particle["lifetime"] -= 1
-            
+
             # Remove dead particles and respawn them
             if particle["lifetime"] <= 0:
                 angle = random.uniform(0, math.pi * 2)
@@ -252,101 +285,106 @@ def welcome_screen(WIDTH, HEIGHT, screen, small_font, init_resources_callback):
                 particle["vy"] = random.uniform(-2, 2)
                 particle["lifetime"] = random.randint(60, 180)
                 particle["color"] = random.choice(particle_colors)
-            
+
             # Draw particle
-            pygame.draw.circle(screen, particle["color"],
-                             (int(particle["x"]), int(particle["y"])),
-                             particle["size"])
-        
+            pygame.draw.circle(
+                screen,
+                particle["color"],
+                (int(particle["x"]), int(particle["y"])),
+                particle["size"],
+            )
+
         # Animate title with color transitions and pulsing
         title_pulse += 0.1
         color_transition += 0.02
-        
+
         # Cycle through flame colors
         color_index = int(color_transition) % len(FLAME_COLORS)
         next_color_index = (color_index + 1) % len(FLAME_COLORS)
         blend_factor = color_transition - int(color_transition)
-        
+
         current_color = FLAME_COLORS[color_index]
         next_color = FLAME_COLORS[next_color_index]
-        
+
         # Blend colors
         r = int(current_color[0] * (1 - blend_factor) + next_color[0] * blend_factor)
         g = int(current_color[1] * (1 - blend_factor) + next_color[1] * blend_factor)
         b = int(current_color[2] * (1 - blend_factor) + next_color[2] * blend_factor)
         title_color = (r, g, b)
-        
+
         # Draw title with glow effect
         title_text = "Super Student"
         title_font = pygame.font.Font(None, 120)
-        
+
         # Pulsing effect
         pulse_factor = 1.0 + 0.1 * math.sin(title_pulse)
-        
+
         # Create glow layers
-        glow_colors = [(r//3, g//3, b//3), (r//2, g//2, b//2)]
+        glow_colors = [(r // 3, g // 3, b // 3), (r // 2, g // 2, b // 2)]
         for i, glow_color in enumerate(glow_colors):
             glow_surface = title_font.render(title_text, True, glow_color)
             glow_rect = glow_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            
+
             # Scale for pulse effect
             if pulse_factor != 1.0:
                 scaled_width = int(glow_surface.get_width() * pulse_factor)
                 scaled_height = int(glow_surface.get_height() * pulse_factor)
                 glow_surface = pygame.transform.scale(glow_surface, (scaled_width, scaled_height))
                 glow_rect = glow_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-            
+
             # Draw glow offset
             offset = (i + 1) * 3
             for dx, dy in [(-offset, 0), (offset, 0), (0, -offset), (0, offset)]:
                 offset_rect = glow_rect.copy()
                 offset_rect.center = (WIDTH // 2 + dx, HEIGHT // 2 + dy)
                 screen.blit(glow_surface, offset_rect)
-        
+
         # Draw main title
         title_surface = title_font.render(title_text, True, title_color)
         title_rect = title_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        
+
         # Scale for pulse effect
         if pulse_factor != 1.0:
             scaled_width = int(title_surface.get_width() * pulse_factor)
             scaled_height = int(title_surface.get_height() * pulse_factor)
             title_surface = pygame.transform.scale(title_surface, (scaled_width, scaled_height))
             title_rect = title_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        
+
         screen.blit(title_surface, title_rect)
-        
+
         # Draw SANGSOM text (yellow pulsating) - half the title font size
         sangsom_font = pygame.font.Font(None, 60)  # Half of 120
         yellow_color = (255, 255, 0)
-        
+
         # Pulsating yellow for SANGSOM
         pulse_intensity = 0.3 + 0.2 * math.sin(title_pulse * 1.5)  # Faster pulse
         sangsom_r = min(255, int(255 * (0.8 + pulse_intensity)))
         sangsom_g = min(255, int(255 * (0.8 + pulse_intensity)))
         sangsom_b = int(50 * pulse_intensity)  # Slight blue tint when pulsing
         sangsom_color = (sangsom_r, sangsom_g, sangsom_b)
-        
+
         sangsom_surface = sangsom_font.render("SANGSOM", True, sangsom_color)
         sangsom_rect = sangsom_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 80))
         screen.blit(sangsom_surface, sangsom_rect)
-        
+
         # Draw Kindergarten text (white) - same font size as SANGSOM
         kindergarten_surface = sangsom_font.render("Kindergarten", True, (255, 255, 255))
         kindergarten_rect = kindergarten_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 120))
         screen.blit(kindergarten_surface, kindergarten_rect)
-        
+
         # Draw "Created by Teacher Evan" text (smaller, white)
         credit_font = pygame.font.Font(None, 36)  # Even smaller
         credit_surface = credit_font.render("Created by Teacher Evan", True, (200, 200, 200))
         credit_rect = credit_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 160))
         screen.blit(credit_surface, credit_rect)
-        
+
         # Draw instructions
-        instructions = small_font.render("Click or press any key to continue!", True, (255, 255, 255))
+        instructions = small_font.render(
+            "Click or press any key to continue!", True, (255, 255, 255)
+        )
         instruction_rect = instructions.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 220))
         screen.blit(instructions, instruction_rect)
-        
+
         pygame.display.flip()
-    
+
     return DISPLAY_MODE

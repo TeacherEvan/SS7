@@ -2,12 +2,12 @@ name: SS6 Automated Testing Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Run tests daily at 2 AM UTC to catch environmental issues
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 env:
   REGISTRY: ghcr.io
@@ -30,7 +30,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.13'
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
@@ -41,7 +41,7 @@ jobs:
       - name: Run security checks with Bandit
         run: |
           bandit -r . -f json -o bandit-report.json || true
-          
+
       - name: Check for known vulnerabilities
         run: |
           safety check --json --output safety-report.json || true
@@ -60,7 +60,7 @@ jobs:
     strategy:
       matrix:
         test-type: [unit, integration, sound-system]
-    
+
     permissions:
       contents: read
       packages: write
@@ -113,17 +113,17 @@ jobs:
           print('Testing pygame initialization...')
           pygame.init()
           print('✅ Pygame initialized successfully')
-          
+
           # Test sound system
           print('Testing sound system...')
           pygame.mixer.init()
           print('✅ Sound system initialized')
-          
+
           # Test display (headless)
           print('Testing display system...')
           screen = pygame.display.set_mode((800, 600))
           print('✅ Display system working')
-          
+
           print('All basic systems functional!')
           sys.exit(0)
           "
@@ -136,7 +136,7 @@ jobs:
             -v ${{ github.workspace }}/test-results:/usr/app/test-results \
             ss6-test:latest python run_tests.py
 
-      - name: Run integration tests  
+      - name: Run integration tests
         if: matrix.test-type == 'integration'
         run: |
           docker run --rm --name ss6-integration-test \
@@ -147,11 +147,11 @@ jobs:
           import pygame
           import sys
           import os
-          
+
           # Initialize systems
           pygame.init()
           pygame.mixer.init()
-          
+
           # Test game can start
           try:
               print('Testing game startup...')
@@ -167,7 +167,7 @@ jobs:
               else:
                   print('❌ Game execution failed')
                   sys.exit(1)
-          
+
           print('Integration test completed successfully!')
           "
 
@@ -182,38 +182,38 @@ jobs:
           import os
           import sys
           from universal_class import SoundManager
-          
+
           print('=== COMPREHENSIVE SOUND SYSTEM TEST ===')
-          
+
           # Initialize pygame
           pygame.init()
           pygame.mixer.init()
-          
+
           # Test SoundManager
           print('Testing SoundManager initialization...')
           sound_manager = SoundManager()
-          
+
           if sound_manager.initialized:
               print('✅ SoundManager initialized successfully')
           else:
               print('❌ SoundManager failed to initialize')
               sys.exit(1)
-          
+
           # Test voice file availability
           print('Testing voice file availability...')
           test_voices = ['A', 'B', '1', '2', 'red', 'blue', 'circle', 'square']
           missing_voices = []
-          
+
           for voice in test_voices:
               if not sound_manager.ensure_voice_available(voice):
                   missing_voices.append(voice)
-          
+
           if missing_voices:
               print(f'❌ Missing voice files: {missing_voices}')
               sys.exit(1)
           else:
               print('✅ All test voice files available')
-          
+
           # Test sound playback (will be silent in dummy mode)
           print('Testing sound playback...')
           for voice in test_voices[:4]:  # Test first 4 voices
@@ -221,7 +221,7 @@ jobs:
                   print(f'✅ Successfully played voice: {voice}')
               else:
                   print(f'⚠️  Could not play voice: {voice}')
-          
+
           print('Sound system test completed successfully!')
           "
 
@@ -245,7 +245,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-20.04]
-        python-version: ['3.11', '3.12', '3.13']
+        python-version: ["3.11", "3.12", "3.13"]
       fail-fast: false
 
     steps:
@@ -284,7 +284,7 @@ jobs:
           import pygame
           pygame.init()
           print('✅ Pygame initialized on ${{ matrix.os }} with Python ${{ matrix.python-version }}')
-          
+
           from universal_class import SoundManager
           sm = SoundManager()
           print(f'✅ SoundManager status: {sm.get_status()}')
@@ -296,7 +296,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [docker-tests, compatibility-tests]
     if: always()
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -307,29 +307,29 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Test Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ needs.docker-tests.result }}" == "success" ]; then
             echo "✅ Docker Tests: PASSED" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Docker Tests: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [ "${{ needs.compatibility-tests.result }}" == "success" ]; then
             echo "✅ Compatibility Tests: PASSED" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Compatibility Tests: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Sound System Status" >> $GITHUB_STEP_SUMMARY
           echo "All required voice files verified and sound triggering tested." >> $GITHUB_STEP_SUMMARY
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Container Registry" >> $GITHUB_STEP_SUMMARY
           echo "Docker images are available at: \`ghcr.io/${{ github.repository }}/ss6-game\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results

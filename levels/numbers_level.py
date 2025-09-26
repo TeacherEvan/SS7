@@ -1,13 +1,24 @@
-import pygame
-import random
 import math
+import random
+
+import pygame
+
 from settings import (
-    LETTER_SPAWN_INTERVAL, WHITE, BLACK, FLAME_COLORS,
-    LEVEL_PROGRESS_PATH, SEQUENCES, GROUP_SIZE
+    BLACK,
+    FLAME_COLORS,
+    GROUP_SIZE,
+    LETTER_SPAWN_INTERVAL,
+    LEVEL_PROGRESS_PATH,
+    SEQUENCES,
+    WHITE,
 )
 from universal_class import (
-    GlassShatterManager, HUDManager, MultiTouchManager, 
-    CheckpointManager, FlamethrowerManager, CenterPieceManager
+    CenterPieceManager,
+    CheckpointManager,
+    FlamethrowerManager,
+    GlassShatterManager,
+    HUDManager,
+    MultiTouchManager,
 )
 
 
@@ -16,17 +27,36 @@ class NumbersLevel:
     Handles the Numbers (123) level gameplay logic.
     Sequential number targeting through numbers 1-10.
     """
-    
-    def __init__(self, width, height, screen, fonts, small_font, target_font, 
-                 particle_manager, glass_shatter_manager, multi_touch_manager, 
-                 hud_manager, checkpoint_manager, center_piece_manager, 
-                 flamethrower_manager, resource_manager, create_explosion_func, 
-                 create_flame_effect_func, apply_explosion_effect_func, 
-                 create_particle_func, explosions_list, lasers_list, 
-                 draw_explosion_func, game_over_screen_func, sound_manager):
+
+    def __init__(
+        self,
+        width,
+        height,
+        screen,
+        fonts,
+        small_font,
+        target_font,
+        particle_manager,
+        glass_shatter_manager,
+        multi_touch_manager,
+        hud_manager,
+        checkpoint_manager,
+        center_piece_manager,
+        flamethrower_manager,
+        resource_manager,
+        create_explosion_func,
+        create_flame_effect_func,
+        apply_explosion_effect_func,
+        create_particle_func,
+        explosions_list,
+        lasers_list,
+        draw_explosion_func,
+        game_over_screen_func,
+        sound_manager,
+    ):
         """
         Initialize the Numbers level.
-        
+
         Args:
             width (int): Screen width
             height (int): Screen height
@@ -74,17 +104,19 @@ class NumbersLevel:
         self.draw_explosion = draw_explosion_func
         self.game_over_screen = game_over_screen_func
         self.sound_manager = sound_manager
-        
+
         # Numbers configuration
         self.sequence = SEQUENCES["numbers"]
         print(f"🔢 DEBUG: Numbers sequence: {self.sequence}")
-        self.groups = [self.sequence[i:i+GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)]
+        self.groups = [
+            self.sequence[i : i + GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)
+        ]
         print(f"🔢 DEBUG: Number groups: {self.groups}")
         self.TOTAL_NUMBERS = len(self.sequence)
-        
+
         # Game state variables
         self.reset_level_state()
-        
+
     def reset_level_state(self):
         """Reset all level-specific state variables."""
         # Group progression variables
@@ -95,7 +127,7 @@ class NumbersLevel:
         print(f"🎯 DEBUG: Numbers to target: {self.numbers_to_target}")
         self.target_number = self.numbers_to_target[0] if self.numbers_to_target else None
         print(f"🎯 DEBUG: Initial target number: {self.target_number}")
-        
+
         # Counters and tracking
         self.total_destroyed = 0
         self.overall_destroyed = 0
@@ -103,7 +135,7 @@ class NumbersLevel:
         self.numbers_destroyed = 0
         self.last_checkpoint_triggered = 0
         self.score = 0
-        
+
         # Game state
         self.running = True
         self.game_started = False
@@ -111,12 +143,12 @@ class NumbersLevel:
         self.numbers_to_spawn = self.current_group.copy()
         print(f"🎯 DEBUG: Numbers to spawn initialized: {self.numbers_to_spawn}")
         self.frame_count = 0
-        
+
         # Checkpoint state
         self.checkpoint_waiting = False
         self.checkpoint_delay_frames = 0
         self.just_completed_level = False
-        
+
         # Input state
         self.last_click_time = 0
         self.player_x = self.width // 2
@@ -126,20 +158,20 @@ class NumbersLevel:
         self.mouse_down = False
         self.mouse_press_time = 0
         self.click_count = 0
-        
+
         # Abilities (maintained for compatibility)
         self.abilities = ["laser", "aoe", "charge_up"]
         self.current_ability = "laser"
-        
+
     def run(self):
         """
         Main entry point to run the numbers level.
-        
+
         Returns:
             bool: False to return to menu, True to restart level
         """
         self.reset_level_state()
-        
+
         # Initialize background stars
         stars = []
         for _ in range(100):
@@ -147,46 +179,46 @@ class NumbersLevel:
             y = random.randint(0, self.height)
             radius = random.randint(2, 4)
             stars.append([x, y, radius])
-            
+
         # Main game loop
         clock = pygame.time.Clock()
-        
+
         while self.running:
             # Handle events
             if not self._handle_events():
                 return False
-                
+
             # Spawn numbers
             if self.game_started:
                 self._spawn_numbers()
-                
+
             # Update physics and collisions
             self._update_numbers()
-            
+
             # Handle checkpoint logic
             self._handle_checkpoint_logic()
-            
+
             # Handle level progression
             progression_result = self._handle_level_progression()
             if progression_result is not None:
                 return progression_result
-                
+
             # Draw frame
             self._draw_frame(stars)
-            
+
             # Update frame counter and display
             self.frame_count += 1
             pygame.display.flip()
             clock.tick(50)
-            
+
         return False
-        
+
     def _handle_events(self):
         """Handle all pygame events."""
         for event in pygame.event.get():
             # Handle glass shatter events first
             self.glass_shatter_manager.handle_event(event)
-            
+
             if event.type == pygame.QUIT:
                 self.running = False
                 return False
@@ -195,13 +227,15 @@ class NumbersLevel:
                     # Return to level menu instead of exiting the game completely
                     return "menu"
                 if event.key == pygame.K_SPACE:
-                    self.current_ability = self.abilities[(self.abilities.index(self.current_ability) + 1) % len(self.abilities)]
-                    
+                    self.current_ability = self.abilities[
+                        (self.abilities.index(self.current_ability) + 1) % len(self.abilities)
+                    ]
+
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if not self.mouse_down:
                     self.mouse_press_time = pygame.time.get_ticks()
                     self.mouse_down = True
-                    
+
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 release_time = pygame.time.get_ticks()
                 self.mouse_down = False
@@ -213,7 +247,7 @@ class NumbersLevel:
                     else:
                         click_x, click_y = pygame.mouse.get_pos()
                         self._handle_click(click_x, click_y)
-                        
+
             elif event.type == pygame.FINGERDOWN:
                 touch_result = self.multi_touch_manager.handle_touch_down(event)
                 if touch_result is None:
@@ -223,19 +257,19 @@ class NumbersLevel:
                     self.game_started = True
                 else:
                     self._handle_click(touch_x, touch_y)
-                    
+
             elif event.type == pygame.FINGERUP:
                 touch_result = self.multi_touch_manager.handle_touch_up(event)
                 if touch_result is not None:
                     touch_id, last_x, last_y = touch_result
-                    
+
         return True
-        
+
     def _handle_click(self, click_x, click_y):
         """Handle click/touch on screen."""
         # Flag to track if click hit a target
         hit_target = False
-        
+
         # Process Click on Target
         for number_obj in self.numbers[:]:
             if number_obj["rect"].collidepoint(click_x, click_y):
@@ -247,18 +281,22 @@ class NumbersLevel:
                         self.sound_manager.play_voice(str(number_obj["value"]))
                     # Common destruction effects
                     self.create_explosion(number_obj["x"], number_obj["y"])
-                    self.create_flame_effect(self.player_x, self.player_y - 80, number_obj["x"], number_obj["y"])
+                    self.create_flame_effect(
+                        self.player_x, self.player_y - 80, number_obj["x"], number_obj["y"]
+                    )
                     self.center_piece_manager.trigger_convergence(number_obj["x"], number_obj["y"])
                     self.apply_explosion_effect(number_obj["x"], number_obj["y"], 150, self.numbers)
 
                     # Add visual feedback particles
                     for i in range(20):
                         self.create_particle(
-                            number_obj["x"], number_obj["y"],
+                            number_obj["x"],
+                            number_obj["y"],
                             random.choice(FLAME_COLORS),
                             random.randint(40, 80),
-                            random.uniform(-2, 2), random.uniform(-2, 2),
-                            20
+                            random.uniform(-2, 2),
+                            random.uniform(-2, 2),
+                            20,
                         )
 
                     # Remove number and update counts
@@ -275,11 +313,11 @@ class NumbersLevel:
                 else:
                     # Add feedback for clicking wrong target (shake will be handled by misclick if needed)
                     pass
-        
+
         # If no target was hit, add a crack to the screen
         if not hit_target and self.game_started:
             self.glass_shatter_manager.handle_misclick(click_x, click_y)
-            
+
     def _spawn_numbers(self):
         """Spawn numbers at regular intervals."""
         if self.numbers_to_spawn:
@@ -296,11 +334,11 @@ class NumbersLevel:
                     "dx": random.choice([-1, -0.5, 0.5, 1]) * 1.5,  # Horizontal drift
                     "dy": random.choice([6, 11.5]) * 1.5 * 3.2,  # 20% faster fall speed
                     "can_bounce": False,  # Start without bouncing
-                    "mass": random.uniform(40, 60)  # Mass for collisions
+                    "mass": random.uniform(40, 60),  # Mass for collisions
                 }
                 self.numbers.append(number_obj)
                 self.numbers_spawned += 1
-                
+
     def _update_numbers(self):
         """Update physics and collisions for all numbers."""
         # Update positions and bouncing
@@ -316,19 +354,19 @@ class NumbersLevel:
                 bounce_dampening = 0.8
 
                 # Left/Right Walls
-                if number_obj["x"] <= 0 + number_obj.get("size", 50)/2:
-                    number_obj["x"] = 0 + number_obj.get("size", 50)/2
+                if number_obj["x"] <= 0 + number_obj.get("size", 50) / 2:
+                    number_obj["x"] = 0 + number_obj.get("size", 50) / 2
                     number_obj["dx"] = abs(number_obj["dx"]) * bounce_dampening
-                elif number_obj["x"] >= self.width - number_obj.get("size", 50)/2:
-                    number_obj["x"] = self.width - number_obj.get("size", 50)/2
+                elif number_obj["x"] >= self.width - number_obj.get("size", 50) / 2:
+                    number_obj["x"] = self.width - number_obj.get("size", 50) / 2
                     number_obj["dx"] = -abs(number_obj["dx"]) * bounce_dampening
 
                 # Top/Bottom Walls
-                if number_obj["y"] <= 0 + number_obj.get("size", 50)/2:
-                    number_obj["y"] = 0 + number_obj.get("size", 50)/2
+                if number_obj["y"] <= 0 + number_obj.get("size", 50) / 2:
+                    number_obj["y"] = 0 + number_obj.get("size", 50) / 2
                     number_obj["dy"] = abs(number_obj["dy"]) * bounce_dampening
-                elif number_obj["y"] >= self.height - number_obj.get("size", 50)/2:
-                    number_obj["y"] = self.height - number_obj.get("size", 50)/2
+                elif number_obj["y"] >= self.height - number_obj.get("size", 50) / 2:
+                    number_obj["y"] = self.height - number_obj.get("size", 50) / 2
                     number_obj["dy"] = -abs(number_obj["dy"]) * bounce_dampening
                     # Push horizontally away from edge on bottom bounce
                     number_obj["dx"] *= bounce_dampening
@@ -336,22 +374,25 @@ class NumbersLevel:
                         number_obj["dx"] += random.uniform(0.1, 0.3)
                     else:
                         number_obj["dx"] -= random.uniform(0.1, 0.3)
-                        
+
         # Handle collisions between numbers
         self._handle_number_collisions()
-        
+
     def _handle_number_collisions(self):
         """Handle collisions between falling numbers."""
         # PERFORMANCE: Reduce collision check frequency
         from Display_settings import PERFORMANCE_SETTINGS
-        collision_frequency = PERFORMANCE_SETTINGS.get(self.center_piece_manager.display_mode, PERFORMANCE_SETTINGS["DEFAULT"])["collision_check_frequency"]
+
+        collision_frequency = PERFORMANCE_SETTINGS.get(
+            self.center_piece_manager.display_mode, PERFORMANCE_SETTINGS["DEFAULT"]
+        )["collision_check_frequency"]
         if self.frame_count % collision_frequency == 0:
             for i, number_obj1 in enumerate(self.numbers):
                 for j in range(i + 1, len(self.numbers)):
                     number_obj2 = self.numbers[j]
                     dx = number_obj2["x"] - number_obj1["x"]
                     dy = number_obj2["y"] - number_obj1["y"]
-                    distance_sq = dx*dx + dy*dy
+                    distance_sq = dx * dx + dy * dy
 
                     # Collision radius calculation
                     radius1 = number_obj1.get("size", self.target_font.get_height()) / 1.8
@@ -386,7 +427,7 @@ class NumbersLevel:
                         number_obj1["dy"] -= impulse * number_obj2["mass"] * ny * bounce_factor
                         number_obj2["dx"] += impulse * number_obj1["mass"] * nx * bounce_factor
                         number_obj2["dy"] += impulse * number_obj1["mass"] * ny * bounce_factor
-                        
+
     def _handle_checkpoint_logic(self):
         """Handle checkpoint display logic."""
         self.overall_destroyed = self.total_destroyed + self.numbers_destroyed
@@ -394,11 +435,13 @@ class NumbersLevel:
         # If waiting for animations before showing checkpoint screen
         if self.checkpoint_waiting:
             # Only show checkpoint after delay AND when animations are mostly complete
-            if (self.checkpoint_delay_frames <= 0 and 
-                len(self.explosions) <= 1 and 
-                len(self.lasers) <= 1 and 
-                self.flamethrower_manager.get_count() <= 1 and 
-                not self.center_piece_manager.particles_converging):
+            if (
+                self.checkpoint_delay_frames <= 0
+                and len(self.explosions) <= 1
+                and len(self.lasers) <= 1
+                and self.flamethrower_manager.get_count() <= 1
+                and not self.center_piece_manager.particles_converging
+            ):
                 self.checkpoint_waiting = False
                 self.game_started = False  # Pause the game
                 if not self.checkpoint_manager.show_checkpoint_screen(self.screen, "numbers"):
@@ -409,14 +452,16 @@ class NumbersLevel:
                 self.checkpoint_delay_frames -= 1
 
         # Check if we hit a new checkpoint threshold
-        elif (self.overall_destroyed > 0 and 
-              self.overall_destroyed % 10 == 0 and 
-              self.overall_destroyed // 10 > self.last_checkpoint_triggered and 
-              not self.just_completed_level):
+        elif (
+            self.overall_destroyed > 0
+            and self.overall_destroyed % 10 == 0
+            and self.overall_destroyed // 10 > self.last_checkpoint_triggered
+            and not self.just_completed_level
+        ):
             self.last_checkpoint_triggered = self.overall_destroyed // 10
             self.checkpoint_waiting = True
             self.checkpoint_delay_frames = 60  # Wait ~1 second for animations
-            
+
     def _handle_level_progression(self):
         """Handle level progression and completion."""
         # Check if the current group is finished
@@ -451,11 +496,11 @@ class NumbersLevel:
                     self.running = False  # Exit game loop to return to menu
                 else:
                     self.running = False  # Return to menu since level is complete
-                
+
                 return False  # Exit the loop immediately
-                
+
         return None
-        
+
     def _draw_frame(self, stars):
         """Draw the complete game frame."""
         # Apply screen shake if active
@@ -463,7 +508,7 @@ class NumbersLevel:
 
         # Update glass shatter manager
         self.glass_shatter_manager.update()
-        
+
         # Fill background based on shatter state
         self.screen.fill(self.glass_shatter_manager.get_background_color())
 
@@ -474,7 +519,9 @@ class NumbersLevel:
         self._draw_stars(stars, offset_x, offset_y)
 
         # Draw center piece (swirl particles + target display)
-        self.center_piece_manager.update_and_draw(self.screen, self.target_number, "numbers", offset_x, offset_y)
+        self.center_piece_manager.update_and_draw(
+            self.screen, self.target_number, "numbers", offset_x, offset_y
+        )
 
         # Update and draw falling numbers
         self._update_and_draw_numbers(offset_x, offset_y)
@@ -482,7 +529,7 @@ class NumbersLevel:
         # Process flamethrower effects
         self.flamethrower_manager.update()
         self.flamethrower_manager.draw(self.screen, offset_x, offset_y)
-        
+
         # Process legacy lasers
         self._process_lasers(offset_x, offset_y)
 
@@ -492,25 +539,30 @@ class NumbersLevel:
         # Draw general particles
         self.particle_manager.update()
         self.particle_manager.draw(self.screen, offset_x, offset_y)
-        
+
         # Display HUD info
-        self.hud_manager.display_info(self.screen, self.score, self.current_ability, 
-                                     self.target_number, self.overall_destroyed, 
-                                     self.TOTAL_NUMBERS, "numbers")
-                                     
+        self.hud_manager.display_info(
+            self.screen,
+            self.score,
+            self.current_ability,
+            self.target_number,
+            self.overall_destroyed,
+            self.TOTAL_NUMBERS,
+            "numbers",
+        )
+
     def _draw_stars(self, stars, offset_x, offset_y):
         """Draw and update background stars."""
         for star in stars:
             x, y, radius = star
             y += 1  # Slower star movement speed
-            pygame.draw.circle(self.screen, (200, 200, 200), 
-                             (x + offset_x, y + offset_y), radius)
+            pygame.draw.circle(self.screen, (200, 200, 200), (x + offset_x, y + offset_y), radius)
             if y > self.height + radius:  # Reset when fully off screen
                 y = random.randint(-50, -10)
                 x = random.randint(0, self.width)
             star[1] = y
             star[0] = x
-            
+
     def _update_and_draw_numbers(self, offset_x, offset_y):
         """Update and draw falling numbers."""
         for number_obj in self.numbers[:]:
@@ -520,10 +572,12 @@ class NumbersLevel:
 
             # Use gray for non-target numbers, black for the target number
             text_color = BLACK if number_obj["value"] == self.target_number else (150, 150, 150)
-            
+
             # Use cached font surface if available
             try:
-                cached_surface = self.resource_manager.get_falling_object_surface("numbers", number_obj["value"], text_color)
+                cached_surface = self.resource_manager.get_falling_object_surface(
+                    "numbers", number_obj["value"], text_color
+                )
                 text_rect = cached_surface.get_rect(center=(draw_pos_x, draw_pos_y))
                 # Inflate rect by 50% for easier interaction (25 pixels on each side)
                 interaction_rect = text_rect.inflate(50, 50)
@@ -537,20 +591,23 @@ class NumbersLevel:
                 interaction_rect = text_rect.inflate(50, 50)
                 number_obj["rect"] = interaction_rect
                 self.screen.blit(text_surface, text_rect)
-                
+
     def _process_lasers(self, offset_x, offset_y):
         """Process legacy laser effects."""
         for laser in self.lasers[:]:
             if laser["duration"] > 0:
                 if laser["type"] != "flamethrower":
-                    pygame.draw.line(self.screen, random.choice(laser.get("colors", FLAME_COLORS)),
-                                   (laser["start_pos"][0] + offset_x, laser["start_pos"][1] + offset_y),
-                                   (laser["end_pos"][0] + offset_x, laser["end_pos"][1] + offset_y),
-                                    random.choice(laser.get("widths", [5, 10, 15])))
+                    pygame.draw.line(
+                        self.screen,
+                        random.choice(laser.get("colors", FLAME_COLORS)),
+                        (laser["start_pos"][0] + offset_x, laser["start_pos"][1] + offset_y),
+                        (laser["end_pos"][0] + offset_x, laser["end_pos"][1] + offset_y),
+                        random.choice(laser.get("widths", [5, 10, 15])),
+                    )
                 laser["duration"] -= 1
             else:
                 self.lasers.remove(laser)
-                
+
     def _process_explosions(self, offset_x, offset_y):
         """Process explosion effects."""
         for explosion in self.explosions[:]:
@@ -558,4 +615,4 @@ class NumbersLevel:
                 self.draw_explosion(explosion, offset_x, offset_y)
                 explosion["duration"] -= 1
             else:
-                self.explosions.remove(explosion) 
+                self.explosions.remove(explosion)

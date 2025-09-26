@@ -3,11 +3,13 @@
 Quick audio playback test to verify sounds are audible
 """
 
-import sys
 import os
+import sys
+
 sys.path.append(os.getcwd())
-import pygame
 import time
+
+import pygame
 
 pygame.mixer.init()
 
