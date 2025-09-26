@@ -1,11 +1,39 @@
 {
     "elevenlabs_api_key": "sk_73a0b8afa66fd988f05a2d1c5e5cb6bdea08b5ec75978926",
-    "voice_id": "21m00Tcm4TlvDq8ikWAM",
+    "voice_id": "APpgW59845BoO9h8iuwQ",
     "voice_settings": {
-        "stability": 0.75,
-        "similarity_boost": 0.75
+        "stability": 0.85,
+        "similarity_boost": 0.8,
+        "style": 0.0,
+        "use_speaker_boost": true,
+        "speaking_rate": 0.8
     },
     "enabled": true,
     "fallback_to_beeps": true,
-    "voice_volume": 0.8
+    "voice_volume": 0.8,
+    "speaking_rate": 0.9,
+    "voice_description": "Slow, elderly, stoic male voice",
+    "available_voices": {
+        "female_default": {
+            "id": "21m00Tcm4TlvDq8ikWAM",
+            "name": "Rachel - British Female",
+            "description": "Clear, pleasant female voice",
+            "settings": {
+                "stability": 0.75,
+                "similarity_boost": 0.75,
+                "speaking_rate": 0.9
+            }
+        },
+        "male_elderly_stoic": {
+            "id": "APpgW59845BoO9h8iuwQ",
+            "name": "Elderly Stoic Male",
+            "description": "Slow, elderly, stoic male voice",
+            "settings": {
+                "stability": 0.85,
+                "similarity_boost": 0.8,
+                "speaking_rate": 0.8
+            }
+        }
+    },
+    "current_voice": "male_elderly_stoic"
 }

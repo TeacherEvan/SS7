@@ -35,7 +35,11 @@ class ElevenLabsVoiceGenerator:
         """
         self.api_key = api_key or self._get_api_key()
         self.base_url = "https://api.elevenlabs.io/v1"
-        self.voice_id = "21m00Tcm4TlvDq8ikWAM"  # Rachel - British female voice
+        
+        # Load voice configuration
+        self.config = self._load_voice_config()
+        self.voice_id = self.config.get('voice_id', "21m00Tcm4TlvDq8ikWAM")
+        
         self.sounds_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sounds")
         self.voice_cache_dir = os.path.join(self.sounds_dir, "voice_cache")
         
@@ -65,6 +69,26 @@ class ElevenLabsVoiceGenerator:
                 self.logger.warning(f"Could not read voice config: {e}")
                 
         return None
+    
+    def _load_voice_config(self) -> Dict:
+        """Load voice configuration from config file."""
+        config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "voice_config.json")
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                    return config
+            except Exception as e:
+                self.logger.warning(f"Could not read voice config: {e}")
+        
+        # Return default config if loading fails
+        return {
+            "voice_id": "21m00Tcm4TlvDq8ikWAM",
+            "voice_settings": {
+                "stability": 0.75,
+                "similarity_boost": 0.75
+            }
+        }
     
     def generate_voice(self, text: str, filename: str, stability: float = 0.75, 
                       similarity_boost: float = 0.75) -> bool:
