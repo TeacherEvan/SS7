@@ -1,7 +1,7 @@
 import math
 import random
-
 import pygame
+from typing import List, Dict, Any
 
 from settings import (
     BLACK,
@@ -12,6 +12,8 @@ from settings import (
     SEQUENCES,
     WHITE,
 )
+from base_level import BaseLevel
+from unified_physics import UnifiedObjectFactory, UnifiedTargetSystem, UnifiedPhysicsSystem
 from universal_class import (
     CenterPieceManager,
     CheckpointManager,
@@ -22,7 +24,7 @@ from universal_class import (
 )
 
 
-class CLCaseLevel:
+class CLCaseLevel(BaseLevel):
     """
     Handles the C/L Case level gameplay logic.
     Sequential letter targeting through lowercase alphabet a-z.

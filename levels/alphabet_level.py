@@ -13,7 +13,7 @@ from settings import (
     WHITE,
 )
 from base_level import BaseLevel
-from unified_physics import UnifiedObjectFactory, UnifiedTargetSystem
+from unified_physics import UnifiedObjectFactory, UnifiedTargetSystem, UnifiedPhysicsSystem
 from universal_class import (
     CenterPieceManager,
     CheckpointManager,

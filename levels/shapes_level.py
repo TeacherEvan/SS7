@@ -1,7 +1,7 @@
 import math
 import random
-
 import pygame
+from typing import List, Dict, Any
 
 from Display_settings import PERFORMANCE_SETTINGS
 from settings import (
@@ -13,6 +13,8 @@ from settings import (
     SEQUENCES,
     WHITE,
 )
+from base_level import BaseLevel
+from unified_physics import UnifiedObjectFactory, UnifiedTargetSystem, UnifiedPhysicsSystem
 from universal_class import (
     CheckpointManager,
     FlamethrowerManager,
@@ -22,7 +24,7 @@ from universal_class import (
 )
 
 
-class ShapesLevel:
+class ShapesLevel(BaseLevel):
     """
     Handles the Shapes level gameplay logic.
     """
