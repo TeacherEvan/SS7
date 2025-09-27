@@ -1,7 +1,7 @@
 import math
 import random
-
 import pygame
+from typing import List, Dict, Any
 
 from settings import (
     BLACK,
@@ -12,6 +12,8 @@ from settings import (
     SEQUENCES,
     WHITE,
 )
+from base_level import BaseLevel
+from unified_physics import UnifiedObjectFactory, UnifiedTargetSystem, UnifiedPhysicsSystem
 from universal_class import (
     CenterPieceManager,
     CheckpointManager,
@@ -22,7 +24,7 @@ from universal_class import (
 )
 
 
-class NumbersLevel:
+class NumbersLevel(BaseLevel):
     """
     Handles the Numbers (123) level gameplay logic.
     Sequential number targeting through numbers 1-10.
@@ -81,29 +83,21 @@ class NumbersLevel:
             draw_explosion_func: Function to draw explosion effects
             game_over_screen_func: Function to show game over screen
         """
-        self.width = width
-        self.height = height
-        self.screen = screen
-        self.fonts = fonts
-        self.small_font = small_font
-        self.target_font = target_font
-        self.particle_manager = particle_manager
-        self.glass_shatter_manager = glass_shatter_manager
-        self.multi_touch_manager = multi_touch_manager
-        self.hud_manager = hud_manager
-        self.checkpoint_manager = checkpoint_manager
-        self.center_piece_manager = center_piece_manager
-        self.flamethrower_manager = flamethrower_manager
-        self.resource_manager = resource_manager
-        self.create_explosion = create_explosion_func
-        self.create_flame_effect = create_flame_effect_func
-        self.apply_explosion_effect = apply_explosion_effect_func
-        self.create_particle = create_particle_func
-        self.explosions = explosions_list
-        self.lasers = lasers_list
-        self.draw_explosion = draw_explosion_func
-        self.game_over_screen = game_over_screen_func
-        self.sound_manager = sound_manager
+        # Initialize base level (eliminates ~100 lines of duplicate initialization)
+        super().__init__(
+            width, height, screen, fonts, small_font, target_font,
+            particle_manager, glass_shatter_manager, multi_touch_manager,
+            hud_manager, checkpoint_manager, center_piece_manager,
+            flamethrower_manager, resource_manager, create_explosion_func,
+            create_flame_effect_func, apply_explosion_effect_func,
+            create_particle_func, explosions_list, lasers_list,
+            draw_explosion_func, game_over_screen_func, sound_manager
+        )
+
+        # Initialize unified systems
+        self.object_factory = UnifiedObjectFactory(resource_manager)
+        self.target_system = UnifiedTargetSystem()
+        self.physics_system = UnifiedPhysicsSystem(width, height)
 
         # Numbers configuration
         self.sequence = SEQUENCES["numbers"]
@@ -375,58 +369,28 @@ class NumbersLevel:
                     else:
                         number_obj["dx"] -= random.uniform(0.1, 0.3)
 
-        # Handle collisions between numbers
-        self._handle_number_collisions()
-
-    def _handle_number_collisions(self):
-        """Handle collisions between falling numbers."""
-        # PERFORMANCE: Reduce collision check frequency
-        from Display_settings import PERFORMANCE_SETTINGS
-
-        collision_frequency = PERFORMANCE_SETTINGS.get(
-            self.center_piece_manager.display_mode, PERFORMANCE_SETTINGS["DEFAULT"]
-        )["collision_check_frequency"]
-        if self.frame_count % collision_frequency == 0:
-            for i, number_obj1 in enumerate(self.numbers):
-                for j in range(i + 1, len(self.numbers)):
-                    number_obj2 = self.numbers[j]
-                    dx = number_obj2["x"] - number_obj1["x"]
-                    dy = number_obj2["y"] - number_obj1["y"]
-                    distance_sq = dx * dx + dy * dy
-
-                    # Collision radius calculation
-                    radius1 = number_obj1.get("size", self.target_font.get_height()) / 1.8
-                    radius2 = number_obj2.get("size", self.target_font.get_height()) / 1.8
-                    min_distance = radius1 + radius2
-                    min_distance_sq = min_distance * min_distance
-
-                    if distance_sq < min_distance_sq and distance_sq > 0:
-                        distance = math.sqrt(distance_sq)
-                        # Normalize collision vector
-                        nx = dx / distance
-                        ny = dy / distance
-
-                        # Resolve interpenetration
-                        overlap = min_distance - distance
-                        total_mass = number_obj1["mass"] + number_obj2["mass"]
-                        push_factor = overlap / total_mass
-                        number_obj1["x"] -= nx * push_factor * number_obj2["mass"]
-                        number_obj1["y"] -= ny * push_factor * number_obj2["mass"]
-                        number_obj2["x"] += nx * push_factor * number_obj1["mass"]
-                        number_obj2["y"] += ny * push_factor * number_obj1["mass"]
-
-                        # Calculate collision response
-                        dvx = number_obj1["dx"] - number_obj2["dx"]
-                        dvy = number_obj1["dy"] - number_obj2["dy"]
-                        dot_product = dvx * nx + dvy * ny
-                        impulse = (2 * dot_product) / total_mass
-                        bounce_factor = 0.85
-
-                        # Apply impulse
-                        number_obj1["dx"] -= impulse * number_obj2["mass"] * nx * bounce_factor
-                        number_obj1["dy"] -= impulse * number_obj2["mass"] * ny * bounce_factor
-                        number_obj2["dx"] += impulse * number_obj1["mass"] * nx * bounce_factor
-                        number_obj2["dy"] += impulse * number_obj1["mass"] * ny * bounce_factor
+        # Handle collisions using unified physics system
+        # Convert old dict objects to BaseGameObject for compatibility
+        game_objects = []
+        for num_obj in self.numbers:
+            obj = self.object_factory.create_number_object(
+                num_obj["value"], num_obj["x"], num_obj["y"]
+            )
+            obj.dx = num_obj["dx"]
+            obj.dy = num_obj["dy"] 
+            obj.mass = num_obj["mass"]
+            game_objects.append(obj)
+        
+        # Use unified collision system
+        self.physics_system.handle_object_collisions(game_objects, self.frame_count)
+        
+        # Copy updated physics back to original objects
+        for i, obj in enumerate(game_objects):
+            if i < len(self.numbers):
+                self.numbers[i]["x"] = obj.x
+                self.numbers[i]["y"] = obj.y
+                self.numbers[i]["dx"] = obj.dx
+                self.numbers[i]["dy"] = obj.dy
 
     def _handle_checkpoint_logic(self):
         """Handle checkpoint display logic."""
