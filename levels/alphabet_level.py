@@ -1,7 +1,7 @@
 import math
 import random
-
 import pygame
+from typing import List, Dict, Any
 
 from settings import (
     BLACK,
@@ -12,6 +12,8 @@ from settings import (
     SEQUENCES,
     WHITE,
 )
+from base_level import BaseLevel
+from unified_physics import UnifiedObjectFactory, UnifiedTargetSystem
 from universal_class import (
     CenterPieceManager,
     CheckpointManager,
@@ -22,10 +24,11 @@ from universal_class import (
 )
 
 
-class AlphabetLevel:
+class AlphabetLevel(BaseLevel):
     """
     Handles the Alphabet (ABC) level gameplay logic.
     Sequential letter targeting through the alphabet A-Z.
+    Now inherits from BaseLevel to eliminate code duplication.
     """
 
     def __init__(
@@ -55,7 +58,7 @@ class AlphabetLevel:
         sound_manager,
     ):
         """
-        Initialize the Alphabet level.
+        Initialize the Alphabet level using BaseLevel.
 
         Args:
             width (int): Screen width
@@ -82,46 +85,41 @@ class AlphabetLevel:
             game_over_screen_func: Function to show game over screen
             sound_manager: Sound effect manager
         """
-        self.width = width
-        self.height = height
-        self.screen = screen
-        self.fonts = fonts
-        self.small_font = small_font
-        self.target_font = target_font
-        self.particle_manager = particle_manager
-        self.glass_shatter_manager = glass_shatter_manager
-        self.multi_touch_manager = multi_touch_manager
-        self.hud_manager = hud_manager
-        self.checkpoint_manager = checkpoint_manager
-        self.center_piece_manager = center_piece_manager
-        self.flamethrower_manager = flamethrower_manager
-        self.resource_manager = resource_manager
-        self.create_explosion = create_explosion_func
-        self.create_flame_effect = create_flame_effect_func
-        self.apply_explosion_effect = apply_explosion_effect_func
-        self.create_particle = create_particle_func
-        self.explosions = explosions_list
-        self.lasers = lasers_list
-        self.draw_explosion = draw_explosion_func
-        self.game_over_screen = game_over_screen_func
-        self.sound_manager = sound_manager
+        # Initialize base level (eliminates ~100 lines of duplicate initialization)
+        super().__init__(
+            width, height, screen, fonts, small_font, target_font,
+            particle_manager, glass_shatter_manager, multi_touch_manager,
+            hud_manager, checkpoint_manager, center_piece_manager,
+            flamethrower_manager, resource_manager, create_explosion_func,
+            create_flame_effect_func, apply_explosion_effect_func,
+            create_particle_func, explosions_list, lasers_list,
+            draw_explosion_func, game_over_screen_func, sound_manager
+        )
 
         # Get event manager for tracking
         try:
             from utils.event_tracker import get_event_manager
-
             self.event_manager = get_event_manager()
         except ImportError:
             self.event_manager = None
 
-        # Alphabet configuration
+        # Initialize unified systems
+        self.object_factory = UnifiedObjectFactory(resource_manager)
+        self.target_system = UnifiedTargetSystem()
+        self.physics_system = UnifiedPhysicsSystem(width, height)
+
+        # Alphabet-specific configuration
         self.sequence = SEQUENCES["alphabet"]
         self.groups = [
             self.sequence[i : i + GROUP_SIZE] for i in range(0, len(self.sequence), GROUP_SIZE)
         ]
         self.TOTAL_LETTERS = len(self.sequence)
 
-        # Game state variables
+        # Alphabet-specific game objects (using new system)
+        self.game_objects = []  # Override base class to use BaseGameObject
+        self.letters = []  # Keep for backward compatibility during transition
+
+        # Reset to initialize alphabet-specific state
         self.reset_level_state()
 
     def reset_level_state(self):
@@ -853,3 +851,81 @@ class AlphabetLevel:
             self.TOTAL_LETTERS,
             "alphabet",
         )
+
+    # Implement abstract methods from BaseLevel
+    def get_mode_name(self) -> str:
+        """Return the mode name for this level."""
+        return "alphabet"
+
+    def get_groups(self) -> List[List]:
+        """Return the groups for this level."""
+        return self.groups
+
+    def get_total_objects(self) -> int:
+        """Return the total number of objects in this level."""
+        return self.TOTAL_LETTERS
+
+    def _setup_target_tracking(self):
+        """Setup target tracking for the current target."""
+        if self.target_letter:
+            self._reset_target_tracking(self.target_letter)
+
+    def _should_destroy_object(self, obj) -> bool:
+        """Override to define hit conditions for alphabet level."""
+        # For alphabet level, objects are destroyed if they're part of current target
+        obj_id = obj.value if hasattr(obj, 'value') else str(obj)
+        return obj_id in self.targets_needed and obj_id not in self.current_target_hits
+
+    def _create_game_object(self, obj_data: Dict[str, Any]):
+        """Create a game object from data for alphabet level."""
+        value = obj_data.get("value", "")
+        x = obj_data.get("x", random.randint(50, self.width - 50))
+        y = obj_data.get("y", -50)
+
+        # Create letter object using factory
+        return self.object_factory.create_letter_object(value, x, y)
+
+    def _draw_game_objects(self, offset_x: float, offset_y: float):
+        """Draw alphabet-specific game objects."""
+        for obj in self.letters[:]:
+            draw_pos_x = int(obj["x"] + offset_x)
+            draw_pos_y = int(obj["y"] + offset_y)
+
+            if obj.get("type") == "letter":
+                # Draw Letter
+                display_value = obj["value"]
+                if obj["value"] == "a":
+                    display_value = "α"
+
+                is_target = obj["value"] in self.targets_needed
+                text_color = BLACK if is_target else (150, 150, 150)
+
+                try:
+                    cached_surface = self.resource_manager.get_falling_object_surface(
+                        "alphabet", obj["value"], text_color
+                    )
+                    text_rect = cached_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+                    interaction_rect = text_rect.inflate(50, 50)
+                    obj["rect"] = interaction_rect
+                    self.screen.blit(cached_surface, text_rect)
+                except:
+                    text_surface = self.target_font.render(display_value, True, text_color)
+                    text_rect = text_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+                    interaction_rect = text_rect.inflate(50, 50)
+                    obj["rect"] = interaction_rect
+                    self.screen.blit(text_surface, text_rect)
+
+            elif obj.get("type") == "emoji":
+                emoji_surface = obj.get("surface")
+                if emoji_surface:
+                    is_target = obj["value"] in self.targets_needed
+                    if is_target:
+                        emoji_rect = emoji_surface.get_rect(center=(draw_pos_x, draw_pos_y))
+                        self.screen.blit(emoji_surface, emoji_rect)
+                    else:
+                        emoji_copy = emoji_surface.copy()
+                        emoji_copy.set_alpha(128)
+                        emoji_rect = emoji_copy.get_rect(center=(draw_pos_x, draw_pos_y))
+                        self.screen.blit(emoji_copy, emoji_rect)
+
+                    obj["rect"] = emoji_rect.inflate(20, 20)
