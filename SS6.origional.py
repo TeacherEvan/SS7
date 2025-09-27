@@ -19,7 +19,7 @@ from Display_settings import (
     load_display_mode,
     save_display_mode,
 )
-from levels import AlphabetLevel, CLCaseLevel, ColorsLevel, NumbersLevel, ShapesLevel
+from levels import AlphabetLevel, CLCaseLevel, ColorsLevel, NumbersLevel, ShapesLevel, get_level_factory
 from settings import (
     BLACK,
     COLORS_COLLISION_DELAY,
@@ -41,6 +41,7 @@ from universal_class import (
     SoundManager,
 )
 from utils.event_tracker import get_event_manager
+from utils.game_state_manager import get_game_state_manager, reset_global_game_state
 from welcome_screen import draw_neon_button, level_menu, welcome_screen
 
 # Initialize sound mixer before pygame.init() to avoid conflicts
@@ -203,27 +204,31 @@ for _ in range(100):  # Pre-create some particles to reuse
         }
     )
 
-# Global variables for effects and touches.
+# Global variables for effects and touches - DEPRECATED: Use GameStateManager instead
+# These are kept for backward compatibility but should be removed in future refactoring
 particles = []
 
-# Declare explosions and lasers in global scope so they are available to all functions
-explosions = []
-lasers = []
+# Initialize game state manager early to replace global variables
+_game_state_manager = get_game_state_manager()
+
+# Legacy global variables - replaced by GameStateManager
+explosions = _game_state_manager.get_explosions()
+lasers = _game_state_manager.get_lasers()
 
 # Glass shatter manager and sound manager are initialized in init_resources()
 
-# Add this near the other global variables at the top
+# Legacy player state variables - moved to GameStateManager
 player_color_transition = 0
 player_current_color = FLAME_COLORS[0]
 player_next_color = FLAME_COLORS[1]
 
-# Add global variables for charge-up effect
+# Legacy charge-up effect variables - moved to GameStateManager  
 charging_ability = False
 charge_timer = 0
 charge_particles = []
 ability_target = None
 
-# Add at the top of the file with other global variables
+# Legacy swirl particles variables - moved to GameStateManager
 swirl_particles = []
 particles_converging = False
 convergence_target = None
@@ -240,37 +245,30 @@ convergence_timer = 0
 
 
 def game_loop(mode):
-    global shake_duration, shake_magnitude, particles, explosions, lasers, charging_ability, charge_timer, charge_particles, ability_target, convergence_target, convergence_timer, mother_radius, color_idx, color_sequence, next_color_index, target_dots_left, glass_shatter_manager, multi_touch_manager, flamethrower_manager, center_piece_manager
-
     # Event tracking for the level start (if event manager is available)
     if event_manager:
         event_manager.get_tracker("level").track_level_start(mode)
         event_manager.get_tracker("gameplay").reset_session_stats()
 
-    # Reset global effects that could persist between levels
-    shake_duration = 0
-    shake_magnitude = 0
-    particles = []
-    explosions = []
-    lasers = []
+    # Reset global state using the state manager
+    reset_global_game_state()
+    game_state = get_game_state_manager()
+    
+    # Reset global managers that could persist between levels
     multi_touch_manager.reset()  # Clear any lingering active touches
     glass_shatter_manager.reset()  # Reset glass shatter state
     flamethrower_manager.clear()  # Clear any lingering flamethrower effects
     center_piece_manager.reset()  # Reset center piece state
-    mother_radius = 90  # Default radius for mother dot in Colors level
-    color_sequence = []
-    color_idx = 0
-    next_color_index = 0
-    # Don't initialize target_dots_left here since it's handled in the colors level code
-    convergence_timer = 0
-    charge_timer = 0
-    convergence_target = None
-    charging_ability = False
-    charge_particles = []
-    ability_target = None
 
-    # Initialize player trail particles
-    particles = []
+    # Get level factory for clean level creation
+    level_factory = get_level_factory()
+    
+    # Reset global state in factory
+    level_factory.reset_global_state(
+        game_state.get_explosions(),
+        game_state.get_lasers(),
+        particle_manager
+    )
 
     # Try to read from a persistent settings file to check if shapes was completed
     try:
@@ -345,155 +343,45 @@ def game_loop(mode):
     letters_to_spawn = current_group.copy()
     frame_count = 0
 
-    # --- COLORS LEVEL SPECIAL LOGIC ---
-    if mode == "colors":
-        # Create and run the colors level
-        colors_level = ColorsLevel(
-            WIDTH,
-            HEIGHT,
-            screen,
-            small_font,
-            particle_manager,
-            glass_shatter_manager,
-            multi_touch_manager,
-            hud_manager,
-            mother_radius,
-            create_explosion,
-            checkpoint_manager.show_checkpoint_screen,
-            game_over_screen,
-            explosions,
-            draw_explosion,
-            sound_manager,
-        )
-        return colors_level.run()
-
-    # --- SHAPES LEVEL SPECIAL LOGIC ---
-    if mode == "shapes":
-        # Create and run the shapes level
-        shapes_level = ShapesLevel(
-            WIDTH,
-            HEIGHT,
-            screen,
-            fonts,
-            small_font,
-            TARGET_FONT,
-            particle_manager,
-            glass_shatter_manager,
-            multi_touch_manager,
-            hud_manager,
-            checkpoint_manager,
-            center_piece_manager,
-            flamethrower_manager,
-            resource_manager,
-            create_explosion,
-            create_flame_effect,
-            apply_explosion_effect,
-            create_particle,
-            explosions,
-            lasers,
-            draw_explosion,
-            game_over_screen,
-            sound_manager,
-        )
-        return shapes_level.run()
-
-    # --- ALPHABET LEVEL SPECIAL LOGIC ---
-    if mode == "alphabet":
-        # Create and run the alphabet level
-        alphabet_level = AlphabetLevel(
-            WIDTH,
-            HEIGHT,
-            screen,
-            fonts,
-            small_font,
-            TARGET_FONT,
-            particle_manager,
-            glass_shatter_manager,
-            multi_touch_manager,
-            hud_manager,
-            checkpoint_manager,
-            center_piece_manager,
-            flamethrower_manager,
-            resource_manager,
-            create_explosion,
-            create_flame_effect,
-            apply_explosion_effect,
-            create_particle,
-            explosions,
-            lasers,
-            draw_explosion,
-            game_over_screen,
-            sound_manager,
-        )
-        return alphabet_level.run()
-
-    # --- NUMBERS LEVEL SPECIAL LOGIC ---
-    if mode == "numbers":
-        # Create and run the numbers level
-        numbers_level = NumbersLevel(
-            WIDTH,
-            HEIGHT,
-            screen,
-            fonts,
-            small_font,
-            TARGET_FONT,
-            particle_manager,
-            glass_shatter_manager,
-            multi_touch_manager,
-            hud_manager,
-            checkpoint_manager,
-            center_piece_manager,
-            flamethrower_manager,
-            resource_manager,
-            create_explosion,
-            create_flame_effect,
-            apply_explosion_effect,
-            create_particle,
-            explosions,
-            lasers,
-            draw_explosion,
-            game_over_screen,
-            sound_manager,
-        )
-        return numbers_level.run()
-
-    # --- C/L CASE LEVEL SPECIAL LOGIC ---
-    if mode == "clcase":
-        # Create and run the C/L case level
-        clcase_level = CLCaseLevel(
-            WIDTH,
-            HEIGHT,
-            screen,
-            fonts,
-            small_font,
-            TARGET_FONT,
-            particle_manager,
-            glass_shatter_manager,
-            multi_touch_manager,
-            hud_manager,
-            checkpoint_manager,
-            center_piece_manager,
-            flamethrower_manager,
-            resource_manager,
-            create_explosion,
-            create_flame_effect,
-            apply_explosion_effect,
-            create_particle,
-            explosions,
-            lasers,
-            draw_explosion,
-            game_over_screen,
-            sound_manager,
-        )
-        return clcase_level.run()
-
-    # --- ERROR HANDLER ---
-    # All game modes should be handled by dedicated level classes above.
-    # If we reach this point, there's an unrecognized mode.
-    print(
-        f"Error: Unrecognized game mode '{mode}'. All modes should be handled by dedicated level classes."
+    # --- LEVEL CREATION USING FACTORY PATTERN ---
+    # Get standard level parameters from factory
+    level_params = level_factory.get_level_parameters(
+        mode, WIDTH, HEIGHT, screen, fonts, small_font, TARGET_FONT,
+        particle_manager, glass_shatter_manager, multi_touch_manager,
+        hud_manager, checkpoint_manager, center_piece_manager,
+        flamethrower_manager, resource_manager, create_explosion,
+        create_flame_effect, apply_explosion_effect, create_particle,
+        game_state.get_explosions(), game_state.get_lasers(),
+        draw_explosion, game_over_screen, sound_manager
     )
-    return False  # Return to menu
+    
+    # Handle special cases for different level types
+    if mode == "colors":
+        # Colors level has different parameters
+        colors_params = {
+            'width': WIDTH,
+            'height': HEIGHT,
+            'screen': screen,
+            'small_font': small_font,
+            'particle_manager': particle_manager,
+            'glass_shatter_manager': glass_shatter_manager,
+            'multi_touch_manager': multi_touch_manager,
+            'hud_manager': hud_manager,
+            'mother_radius': mother_radius,
+            'create_explosion_func': create_explosion,
+            'checkpoint_screen_func': checkpoint_manager.show_checkpoint_screen,
+            'game_over_screen_func': game_over_screen,
+            'explosions_list': game_state.get_explosions(),
+            'draw_explosion_func': draw_explosion,
+            'sound_manager': sound_manager,
+        }
+        level = level_factory.create_level(mode, **colors_params)
+    else:
+        # Standard level creation for alphabet, numbers, shapes, clcase
+        level = level_factory.create_level(mode, **level_params)
+    
+    # Run the level
+    return level.run()
 
 
 def create_aoe(x, y, letters, target_letter):
