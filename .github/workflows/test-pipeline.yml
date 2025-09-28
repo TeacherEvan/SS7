@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.13"
 
@@ -91,7 +91,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
@@ -112,17 +112,17 @@ jobs:
           import sys
           print('Testing pygame initialization...')
           pygame.init()
-          print('✅ Pygame initialized successfully')
+          print('[OK] Pygame initialized successfully')
 
           # Test sound system
           print('Testing sound system...')
           pygame.mixer.init()
-          print('✅ Sound system initialized')
+          print('[OK] Sound system initialized')
 
           # Test display (headless)
           print('Testing display system...')
           screen = pygame.display.set_mode((800, 600))
-          print('✅ Display system working')
+          print('[OK] Display system working')
 
           print('All basic systems functional!')
           sys.exit(0)
@@ -156,16 +156,16 @@ jobs:
           try:
               print('Testing game startup...')
               from SS6 import main  # Assuming there's a main function
-              print('✅ Game imports successfully')
+              print('[OK] Game imports successfully')
           except ImportError as e:
-              print(f'⚠️  Could not import main game module: {e}')
+              print(f'[WARN] Could not import main game module: {e}')
               # Try direct execution test
               print('Testing direct execution...')
               exit_code = os.system('python SS6.origional.py --test-mode 2>/dev/null')
               if exit_code == 0:
-                  print('✅ Game can execute in test mode')
+                  print('[OK] Game can execute in test mode')
               else:
-                  print('❌ Game execution failed')
+                  print('[ERROR] Game execution failed')
                   sys.exit(1)
 
           print('Integration test completed successfully!')
@@ -194,9 +194,9 @@ jobs:
           sound_manager = SoundManager()
 
           if sound_manager.initialized:
-              print('✅ SoundManager initialized successfully')
+              print('[OK] SoundManager initialized successfully')
           else:
-              print('❌ SoundManager failed to initialize')
+              print('[ERROR] SoundManager failed to initialize')
               sys.exit(1)
 
           # Test voice file availability
@@ -209,25 +209,25 @@ jobs:
                   missing_voices.append(voice)
 
           if missing_voices:
-              print(f'❌ Missing voice files: {missing_voices}')
+              print(f'[ERROR] Missing voice files: {missing_voices}')
               sys.exit(1)
           else:
-              print('✅ All test voice files available')
+              print('[OK] All test voice files available')
 
           # Test sound playback (will be silent in dummy mode)
           print('Testing sound playback...')
           for voice in test_voices[:4]:  # Test first 4 voices
               if sound_manager.play_voice(voice):
-                  print(f'✅ Successfully played voice: {voice}')
+                  print(f'[OK] Successfully played voice: {voice}')
               else:
-                  print(f'⚠️  Could not play voice: {voice}')
+                  print(f'[WARN]  Could not play voice: {voice}')
 
           print('Sound system test completed successfully!')
           "
 
       - name: Push image to registry
         if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
@@ -253,7 +253,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -283,11 +283,11 @@ jobs:
           python -c "
           import pygame
           pygame.init()
-          print('✅ Pygame initialized on ${{ matrix.os }} with Python ${{ matrix.python-version }}')
+          print('[OK] Pygame initialized on ${{ matrix.os }} with Python ${{ matrix.python-version }}')
 
           from universal_class import SoundManager
           sm = SoundManager()
-          print(f'✅ SoundManager status: {sm.get_status()}')
+          print(f'[OK] SoundManager status: {sm.get_status()}')
           "
 
   # Generate test report
@@ -309,15 +309,15 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ needs.docker-tests.result }}" == "success" ]; then
-            echo "✅ Docker Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "[OK] Docker Tests: PASSED" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Docker Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "[ERROR] Docker Tests: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ "${{ needs.compatibility-tests.result }}" == "success" ]; then
-            echo "✅ Compatibility Tests: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "[OK] Compatibility Tests: PASSED" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Compatibility Tests: FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "[ERROR] Compatibility Tests: FAILED" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -329,7 +329,7 @@ jobs:
           echo "Docker images are available at: \`ghcr.io/${{ github.repository }}/ss6-game\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: test-results
