@@ -21,7 +21,7 @@
       "sound_triggers_tested": [],
       "missing_sounds": [],
       "timing_issues": [
-        "Error: NumbersLevel.__init__() got an unexpected keyword argument 'flame_colors'"
+        "Error: Can't instantiate abstract class NumbersLevel without an implementation for abstract methods '_setup_target_tracking', 'get_groups', 'get_mode_name', 'get_total_objects'"
       ],
       "integration_status": "failed"
     },
@@ -39,7 +39,7 @@
       "sound_triggers_tested": [],
       "missing_sounds": [],
       "timing_issues": [
-        "Error: ShapesLevel.__init__() got an unexpected keyword argument 'flame_colors'"
+        "Error: Can't instantiate abstract class ShapesLevel without an implementation for abstract methods '_setup_target_tracking', 'get_groups', 'get_mode_name', 'get_total_objects'"
       ],
       "integration_status": "failed"
     },
@@ -48,7 +48,7 @@
       "sound_triggers_tested": [],
       "missing_sounds": [],
       "timing_issues": [
-        "Error: CLCaseLevel.__init__() got an unexpected keyword argument 'flame_colors'"
+        "Error: Can't instantiate abstract class CLCaseLevel without an implementation for abstract methods '_setup_target_tracking', 'get_groups', 'get_mode_name', 'get_total_objects'"
       ],
       "integration_status": "failed"
     }
