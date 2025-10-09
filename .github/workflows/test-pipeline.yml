@@ -329,7 +329,7 @@ jobs:
           echo "Docker images are available at: \`ghcr.io/${{ github.repository }}/ss6-game\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
