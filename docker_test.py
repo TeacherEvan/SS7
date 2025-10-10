@@ -216,12 +216,12 @@ def test_resource_management():
         from utils.resource_manager import ResourceManager
 
         # Test resource manager initialization
-        resource_manager = ResourceManager(800, 600)
+        resource_manager = ResourceManager()
         print("✅ Resource manager initialized")
 
-        # Test font loading
-        resource_manager.initialize_fonts()
-        print("✅ Fonts initialized")
+        # Test game resources initialization
+        resource_manager.initialize_game_resources()
+        print("✅ Game resources initialized")
 
         return True
 
